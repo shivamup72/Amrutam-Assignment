@@ -1,7 +1,3 @@
-9/8998/**
- * Doctor Card Component (Pure JavaScript)
- */
-
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';
