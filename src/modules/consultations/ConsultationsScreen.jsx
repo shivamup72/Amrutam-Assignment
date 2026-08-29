@@ -23,9 +23,9 @@ export const ConsultationsScreen = ({ navigation }) => {
   const t = translations[language] || translations.en;
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Doctors');
+  const [selectedCategory, setSelectedCategory] = useState(t.allDoctors);
 
-  const categories = ['All Doctors', 'Ayurveda', 'Yoga', 'Diet & Nutrition', 'Panchakarma'];
+  const categories = [t.allDoctors, t.ayurveda, t.yoga, t.dietNutrition, t.panchakarma];
 
   const filteredDoctors = useMemo(() => {
     let result = doctors;
@@ -40,7 +40,7 @@ export const ConsultationsScreen = ({ navigation }) => {
       );
     }
 
-    if (selectedCategory !== 'All Doctors') {
+    if (selectedCategory !== t.allDoctors) {
       result = result.filter((d) =>
         d.specialty?.toLowerCase().includes(selectedCategory.toLowerCase().split(' ')[0])
       );
@@ -68,7 +68,7 @@ export const ConsultationsScreen = ({ navigation }) => {
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search doctors, specialties..."
+          placeholder={t.searchDoctorsPlaceholder || 'Search doctors, specialties...'}
           placeholderTextColor="#78716C"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -113,7 +113,7 @@ export const ConsultationsScreen = ({ navigation }) => {
 
       {/* Section Header */}
       <View style={styles.sectionHeaderRow}>
-        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Available Specialists</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{t.availableSpecialists}</Text>
       </View>
     </View>
   );
@@ -126,7 +126,7 @@ export const ConsultationsScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         renderItem={renderDoctorItem}
         headerComponent={renderHeader()}
-        emptyMessage="No doctors matching search criteria"
+        emptyMessage={t.noDoctorsFound || 'No doctors matching search criteria'}
         error={error}
         refreshing={loading === 'pending'}
         onRefresh={() => dispatch(fetchDoctors({ useCache: false }))}

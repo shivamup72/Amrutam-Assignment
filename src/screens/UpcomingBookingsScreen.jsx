@@ -2,13 +2,14 @@
  * Upcoming Bookings Screen (React Navigation Stack Screen)
  */
 
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { cancelConsultationBooking } from '../store/slices/consultationsSlice';
 import { addToast } from '../store/slices/devSlice';
 import { lightTheme, darkTheme } from '../theme/theme';
 import { translations } from '../core/i18n/i18n';
+import { VirtualizedGrid } from '../components/VirtualizedGrid';
 
 export const UpcomingBookingsScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -18,11 +19,49 @@ export const UpcomingBookingsScreen = ({ navigation }) => {
   const colors = isDarkMode ? darkTheme : lightTheme;
   const t = translations[language];
 
+  const renderBookingItem = useCallback(({ item: booking }) => {
+    const isCancelled = booking.status === 'CANCELLED';
+
+    return (
+      <View
+        style={[
+          styles.bookingCard,
+          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+        ]}
+      >
+        <View style={styles.bookingRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.docName, { color: colors.textPrimary }]}>{booking.doctorName}</Text>
+            <Text style={[styles.spec, { color: colors.primary }]}>{booking.specialty}</Text>
+            <Text style={[styles.time, { color: colors.textSecondary }]}>⏰ {booking.slotTime} • 🗓️ {booking.slotDate}</Text>
+          </View>
+          <View style={{ alignItems: 'flex-end' }}>
+            <View style={[styles.statusBadge, { backgroundColor: isCancelled ? '#FEE2E2' : '#DCFCE7' }]}>
+              <Text style={[styles.statusText, { color: isCancelled ? '#991B1B' : '#166534' }]}>{booking.status}</Text>
+            </View>
+            <Text style={[styles.fee, { color: colors.textPrimary }]}>₹{booking.consultationFee}</Text>
+          </View>
+        </View>
+        {!isCancelled ? (
+          <TouchableOpacity
+            style={styles.cancelBtn}
+            onPress={() => {
+              dispatch(cancelConsultationBooking({ bookingId: booking.id, isOffline }));
+              dispatch(addToast({ type: 'info', title: t.bookingCancelled, message: t.slotReleased }));
+            }}
+          >
+            <Text style={styles.cancelBtnText}>{t.cancelBooking}</Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+    );
+  }, [colors, dispatch, isOffline, t]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.surfaceBorder }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={{ fontSize: 18, color: colors.textPrimary }}>← Back</Text>
+          <Text style={{ fontSize: 18, color: colors.textPrimary }}>← {t.back}</Text>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
           {t.upcomingConsultations} ({upcomingBookings.length})
@@ -30,79 +69,13 @@ export const UpcomingBookingsScreen = ({ navigation }) => {
         <View style={{ width: 60 }} />
       </View>
 
-      <ScrollView style={styles.body}>
-        {upcomingBookings.length === 0 ? (
-          <View style={styles.emptyBox}>
-            <Text style={{ fontSize: 42, marginBottom: 12 }}>📅</Text>
-            <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: 16 }}>
-              No consultations booked yet
-            </Text>
-          </View>
-        ) : (
-          upcomingBookings.map((booking) => {
-            const isCancelled = booking.status === 'CANCELLED';
-            return (
-              <View
-                key={booking.id}
-                style={[
-                  styles.bookingCard,
-                  {
-                    backgroundColor: colors.cardBg,
-                    borderColor: colors.cardBorder,
-                  },
-                ]}
-              >
-                <View style={styles.bookingRow}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.docName, { color: colors.textPrimary }]}>
-                      {booking.doctorName}
-                    </Text>
-                    <Text style={[styles.spec, { color: colors.primary }]}>
-                      {booking.specialty}
-                    </Text>
-                    <Text style={[styles.time, { color: colors.textSecondary }]}>
-                      ⏰ {booking.slotTime} • 🗓️ {booking.slotDate}
-                    </Text>
-                  </View>
-
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        { backgroundColor: isCancelled ? '#FEE2E2' : '#DCFCE7' },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.statusText,
-                          { color: isCancelled ? '#991B1B' : '#166534' },
-                        ]}
-                      >
-                        {booking.status}
-                      </Text>
-                    </View>
-                    <Text style={[styles.fee, { color: colors.textPrimary }]}>
-                      ₹{booking.consultationFee}
-                    </Text>
-                  </View>
-                </View>
-
-                {!isCancelled ? (
-                  <TouchableOpacity
-                    style={styles.cancelBtn}
-                    onPress={() => {
-                      dispatch(cancelConsultationBooking({ bookingId: booking.id, isOffline }));
-                      dispatch(addToast({ type: 'info', title: 'Booking Cancelled', message: 'Slot released' }));
-                    }}
-                  >
-                    <Text style={styles.cancelBtnText}>{t.cancelBooking}</Text>
-                  </TouchableOpacity>
-                ) : null}
-              </View>
-            );
-          })
-        )}
-      </ScrollView>
+      <VirtualizedGrid
+        data={upcomingBookings}
+        pageSize={20}
+        keyExtractor={(item) => item.id}
+        renderItem={renderBookingItem}
+        emptyMessage={t.noBookingsYet}
+      />
     </SafeAreaView>
   );
 };
@@ -122,6 +95,7 @@ const styles = StyleSheet.create({
   backBtn: {
     paddingVertical: 6,
     paddingHorizontal: 8,
+    transform: [{ translateY: -2 }],
   },
   headerTitle: {
     fontSize: 18,

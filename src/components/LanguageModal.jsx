@@ -15,6 +15,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { setLanguage } from '../store/slices/devSlice';
 import { lightTheme, darkTheme, spacing } from '../theme/theme';
+import { translations } from '../core/i18n/i18n';
 
 const LANGUAGES = [
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧' },
@@ -25,6 +26,7 @@ export const LanguageModal = ({ visible, onClose }) => {
   const dispatch = useDispatch();
   const { isDarkMode, language } = useSelector((state) => state.dev);
   const colors = isDarkMode ? darkTheme : lightTheme;
+  const t = translations[language] || translations.en;
 
   const handleSelectLanguage = (code) => {
     dispatch(setLanguage(code));
@@ -81,7 +83,7 @@ export const LanguageModal = ({ visible, onClose }) => {
             <View style={[styles.modalCard, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}>
               <View style={styles.header}>
                 <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
-                  Select App Language
+                  {t.selectAppLanguage}
                 </Text>
                 <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
                   <Text style={[styles.closeBtnText, { color: colors.textMuted }]}>✕</Text>
@@ -89,7 +91,7 @@ export const LanguageModal = ({ visible, onClose }) => {
               </View>
 
               <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                Choose your preferred language for clinical records & dashboard
+                {t.chooseLanguage}
               </Text>
 
               <FlatList

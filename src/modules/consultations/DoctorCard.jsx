@@ -6,10 +6,12 @@ import React, { memo } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';
 import { lightTheme, darkTheme } from '../../theme/theme';
+import { translations } from '../../core/i18n/i18n';
 
 export const DoctorCard = memo(({ doctor, onSelect }) => {
-  const { isDarkMode } = useSelector((state) => state.dev);
+  const { isDarkMode, language } = useSelector((state) => state.dev);
   const colors = isDarkMode ? darkTheme : lightTheme;
+  const t = translations[language] || translations.en;
 
   return (
     <View
@@ -41,7 +43,7 @@ export const DoctorCard = memo(({ doctor, onSelect }) => {
 
       <View style={styles.footerRow}>
         <View>
-          <Text style={[styles.feeLabel, { color: colors.textMuted }]}>Consultation Fee</Text>
+          <Text style={[styles.feeLabel, { color: colors.textMuted }]}>{t.consultationFee}</Text>
           <Text style={[styles.feeVal, { color: colors.textPrimary }]}>
             ₹{doctor.consultationFee}
           </Text>
@@ -50,7 +52,7 @@ export const DoctorCard = memo(({ doctor, onSelect }) => {
         <View style={styles.rightActions}>
           {doctor.isAvailableToday ? (
             <View style={styles.todayBadge}>
-              <Text style={styles.todayBadgeText}>🟢 Available Today</Text>
+              <Text style={styles.todayBadgeText}>🟢 {t.availableToday}</Text>
             </View>
           ) : null}
 
@@ -58,7 +60,7 @@ export const DoctorCard = memo(({ doctor, onSelect }) => {
             style={[styles.bookBtn, { backgroundColor: colors.primary }]}
             onPress={() => onSelect(doctor)}
           >
-            <Text style={styles.bookBtnText}>View Details</Text>
+            <Text style={styles.bookBtnText}>{t.viewDetails}</Text>
           </TouchableOpacity>
         </View>
       </View>

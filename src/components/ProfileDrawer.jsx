@@ -35,7 +35,7 @@ export const ProfileDrawer = ({ visible, onClose }) => {
   const slideAnim = useRef(new Animated.Value(-drawerWidth)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  const { isDarkMode, language, isOffline, isBiometricEnabled } = useSelector((state) => state.dev || {});
+  const { isDarkMode, language, isBiometricEnabled } = useSelector((state) => state.dev || {});
   const { upcomingBookings = [] } = useSelector((state) => state.consultations || {});
   const { cart = [], wishlistIds = [] } = useSelector((state) => state.shop || {});
 
@@ -47,11 +47,10 @@ export const ProfileDrawer = ({ visible, onClose }) => {
   const totalCartCount = (cart || []).reduce((sum, item) => sum + (item?.quantity || 0), 0);
   const activeBookingsCount = (upcomingBookings || []).filter((b) => b?.status === 'UPCOMING').length;
   const wishlistCount = (wishlistIds || []).length;
-  const pendingQueueCount = offlineEngine?.getQueue?.()?.length || 0;
 
   const langNames = {
-    en: '🇬🇧 English',
-    hi: '🇮🇳 हिंदी',
+    en: `🇬🇧 ${t.english}`,
+    hi: `🇮🇳 ${t.hindi}`,
   };
 
   useEffect(() => {
@@ -124,7 +123,7 @@ export const ProfileDrawer = ({ visible, onClose }) => {
                 {/* Drawer Header */}
                 <View style={styles.drawerHeader}>
                   <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
-                    Profile & Settings
+                    {t.profileSettings}
                   </Text>
                   <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
                     <Text style={[styles.closeText, { color: colors.textMuted }]}>✕</Text>
@@ -149,7 +148,7 @@ export const ProfileDrawer = ({ visible, onClose }) => {
                   </View>
 
                   {/* Section 1: My Health & Activity */}
-                  <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>My Activity</Text>
+                  <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>{t.myActivity}</Text>
 
                   {/* Consultations Item */}
                   <TouchableOpacity
@@ -159,11 +158,11 @@ export const ProfileDrawer = ({ visible, onClose }) => {
                   >
                     <View style={styles.menuItemLeft}>
                       <Text style={styles.menuIcon}>🩺</Text>
-                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>My Consultations</Text>
+                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>{t.myConsultations}</Text>
                     </View>
                     {activeBookingsCount > 0 ? (
                       <View style={[styles.countBadge, { backgroundColor: colors.secondary }]}>
-                        <Text style={styles.countBadgeText}>{activeBookingsCount} Active</Text>
+                        <Text style={styles.countBadgeText}>{activeBookingsCount} {t.active}</Text>
                       </View>
                     ) : (
                       <Text style={[styles.chevron, { color: colors.textMuted }]}>›</Text>
@@ -178,7 +177,7 @@ export const ProfileDrawer = ({ visible, onClose }) => {
                   >
                     <View style={styles.menuItemLeft}>
                       <Text style={styles.menuIcon}>❤️</Text>
-                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>Saved Wishlist</Text>
+                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>{t.savedWishlist}</Text>
                     </View>
                     {wishlistCount > 0 ? (
                       <View style={[styles.countBadge, { backgroundColor: colors.primary }]}>
@@ -197,11 +196,11 @@ export const ProfileDrawer = ({ visible, onClose }) => {
                   >
                     <View style={styles.menuItemLeft}>
                       <Text style={styles.menuIcon}>🛒</Text>
-                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>Shopping Cart</Text>
+                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>{t.shoppingCart}</Text>
                     </View>
                     {totalCartCount > 0 ? (
                       <View style={[styles.countBadge, { backgroundColor: colors.secondary }]}>
-                        <Text style={styles.countBadgeText}>{totalCartCount} items</Text>
+                        <Text style={styles.countBadgeText}>{totalCartCount} {t.items}</Text>
                       </View>
                     ) : (
                       <Text style={[styles.chevron, { color: colors.textMuted }]}>›</Text>
@@ -209,7 +208,7 @@ export const ProfileDrawer = ({ visible, onClose }) => {
                   </TouchableOpacity>
 
                   {/* Section 2: Preferences & Theme */}
-                  <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>Preferences</Text>
+                  <Text style={[styles.sectionHeading, { color: colors.textMuted }]}>{t.profileSettings}</Text>
 
                   {/* Language Selector Item */}
                   <TouchableOpacity
@@ -219,10 +218,10 @@ export const ProfileDrawer = ({ visible, onClose }) => {
                   >
                     <View style={styles.menuItemLeft}>
                       <Text style={styles.menuIcon}>🌐</Text>
-                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>App Language</Text>
+                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>{t.appLanguage}</Text>
                     </View>
                     <View style={styles.valRow}>
-                      <Text style={[styles.valText, { color: colors.primary }]}>{langNames[language] || 'English'}</Text>
+                      <Text style={[styles.valText, { color: colors.primary }]}>{langNames[language] || t.english}</Text>
                       <Text style={[styles.chevron, { color: colors.textMuted }]}>›</Text>
                     </View>
                   </TouchableOpacity>
@@ -231,7 +230,7 @@ export const ProfileDrawer = ({ visible, onClose }) => {
                   <View style={[styles.menuItem, { backgroundColor: colors.badgeBg }]}>
                     <View style={styles.menuItemLeft}>
                       <Text style={styles.menuIcon}>{isDarkMode ? '🌙' : '☀️'}</Text>
-                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>Dark Mode</Text>
+                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>{t.darkMode}</Text>
                     </View>
                     <Switch
                       value={isDarkMode}
@@ -245,7 +244,7 @@ export const ProfileDrawer = ({ visible, onClose }) => {
                   <View style={[styles.menuItem, { backgroundColor: colors.badgeBg }]}>
                     <View style={styles.menuItemLeft}>
                       <Text style={styles.menuIcon}>🔒</Text>
-                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>Biometric Lock</Text>
+                      <Text style={[styles.menuText, { color: colors.textPrimary }]}>{t.biometricLock}</Text>
                     </View>
                     <Switch
                       value={isBiometricEnabled}
@@ -254,10 +253,10 @@ export const ProfileDrawer = ({ visible, onClose }) => {
                         dispatch(
                           addToast({
                             type: isBiometricEnabled ? 'info' : 'success',
-                            title: !isBiometricEnabled ? 'Biometric Security Enabled' : 'Biometric Security Disabled',
+                            title: !isBiometricEnabled ? t.biometricSecurityEnabled : t.biometricSecurityDisabled,
                             message: !isBiometricEnabled
-                              ? 'Fingerprint / FaceID lock activated.'
-                              : 'App security lock disabled.',
+                              ? t.biometricActivated
+                              : t.biometricDisabled,
                           })
                         );
                       }}

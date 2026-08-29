@@ -34,7 +34,7 @@ export const CheckoutScreen = ({ route, navigation }) => {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.surfaceBorder }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={{ fontSize: 18, color: colors.textPrimary }}>← Back</Text>
+          <Text style={{ fontSize: 18, color: colors.textPrimary }}>← {t.back}</Text>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{t.checkout}</Text>
         <View style={{ width: 60 }} />
@@ -42,28 +42,28 @@ export const CheckoutScreen = ({ route, navigation }) => {
 
       <ScrollView style={styles.body}>
         <View style={[styles.box, { backgroundColor: colors.badgeBg }]}>
-          <Text style={[styles.boxTitle, { color: colors.textPrimary }]}>Order Summary</Text>
+          <Text style={[styles.boxTitle, { color: colors.textPrimary }]}>{t.orderSummary}</Text>
           <Text style={[styles.boxSub, { color: colors.textSecondary }]}>
             {cart.length} unique Ayurvedic products ({cart.reduce((s, i) => s + i.quantity, 0)} items)
           </Text>
 
           <View style={styles.row}>
-            <Text style={{ color: colors.textSecondary }}>Delivery Address:</Text>
+            <Text style={{ color: colors.textSecondary }}>{t.deliveryAddress}</Text>
             <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>
-              Registered Amrutam Home
+              {t.registeredHome}
             </Text>
           </View>
 
           <View style={styles.row}>
-            <Text style={{ color: colors.textSecondary }}>Payment Method:</Text>
+            <Text style={{ color: colors.textSecondary }}>{t.paymentMethod}</Text>
             <Text style={{ color: colors.primary, fontWeight: '700' }}>
-              UPI / Wallet / Cash on Delivery
+              {t.paymentOptions}
             </Text>
           </View>
 
           <View style={[styles.row, { marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: '#CBD5E1' }]}>
             <Text style={{ fontSize: 16, fontWeight: '800', color: colors.textPrimary }}>
-              Final Amount:
+              {t.finalAmount}
             </Text>
             <Text style={{ fontSize: 20, fontWeight: '900', color: colors.textPrimary }}>
               ₹{totalAmount}
@@ -74,7 +74,7 @@ export const CheckoutScreen = ({ route, navigation }) => {
         {isOffline ? (
           <View style={styles.offlineNotice}>
             <Text style={styles.offlineNoticeText}>
-              ⚡ You are currently offline. Placing this order will add it to your offline queue. It will automatically process as soon as internet connectivity returns.
+              {t.offlineCheckoutNotice}
             </Text>
           </View>
         ) : null}
@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
   backBtn: {
     paddingVertical: 6,
     paddingHorizontal: 8,
+    transform: [{ translateY: -2 }],
   },
   headerTitle: {
     fontSize: 18,

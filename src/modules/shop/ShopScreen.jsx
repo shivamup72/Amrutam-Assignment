@@ -23,9 +23,9 @@ export const ShopScreen = ({ navigation }) => {
   const t = translations[language] || translations.en;
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Products');
+  const [selectedCategory, setSelectedCategory] = useState(t.allProducts);
 
-  const categories = ['All Products', 'Herbal Oils', 'Supplements', 'Teas & Elixirs', 'Digestive'];
+  const categories = [t.allProducts, t.herbalOils, t.supplements, t.teasAndElixirs, t.digestive];
 
   const filteredProducts = useMemo(() => {
     let result = products;
@@ -40,7 +40,7 @@ export const ShopScreen = ({ navigation }) => {
       );
     }
 
-    if (selectedCategory !== 'All Products') {
+    if (selectedCategory !== t.allProducts) {
       result = result.filter((p) =>
         p.category?.toLowerCase().includes(selectedCategory.toLowerCase().split(' ')[0])
       );
@@ -68,7 +68,7 @@ export const ShopScreen = ({ navigation }) => {
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search products, oils, teas..."
+          placeholder={t.searchProductsPlaceholder || 'Search products, oils, teas...'}
           placeholderTextColor="#78716C"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -121,7 +121,7 @@ export const ShopScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         renderItem={renderProductItem}
         headerComponent={renderHeader()}
-        emptyMessage="No products found"
+        emptyMessage={t.noProductsFound || 'No products found'}
         error={error}
         refreshing={loading === 'pending'}
         onRefresh={() => dispatch(fetchProducts({ useCache: false }))}

@@ -2,13 +2,14 @@
  * Wishlist Screen (React Navigation Stack Screen)
  */
 
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCart, toggleWishlist } from '../store/slices/shopSlice';
 import { addToast } from '../store/slices/devSlice';
 import { lightTheme, darkTheme } from '../theme/theme';
 import { translations } from '../core/i18n/i18n';
+import { VirtualizedGrid } from '../components/VirtualizedGrid';
 
 export const WishlistScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -20,11 +21,31 @@ export const WishlistScreen = ({ navigation }) => {
 
   const wishlistedProducts = products.filter((p) => wishlistIds.includes(p.id));
 
+  const renderWishlistItem = useCallback(({ item: product }) => (
+    <View style={[styles.itemCard, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+      <Image source={{ uri: product.imageUrl }} style={styles.itemImg} />
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.itemTitle, { color: colors.textPrimary }]} numberOfLines={1}>{product.title}</Text>
+        <Text style={[styles.itemPrice, { color: colors.primary }]}>₹{product.price}</Text>
+      </View>
+      <TouchableOpacity
+        style={[styles.moveBtn, { backgroundColor: colors.primary }]}
+        onPress={() => {
+          dispatch(addToCart({ product, isOffline }));
+          dispatch(toggleWishlist(product.id));
+          dispatch(addToast({ type: 'success', title: t.moveToCart, message: product.title }));
+        }}
+      >
+        <Text style={styles.moveBtnText}>{t.moveToCart}</Text>
+      </TouchableOpacity>
+    </View>
+  ), [colors, dispatch, isOffline, t]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.surfaceBorder }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={{ fontSize: 18, color: colors.textPrimary }}>← Back</Text>
+          <Text style={{ fontSize: 18, color: colors.textPrimary }}>← {t.back}</Text>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
           ❤️ {t.wishlist} ({wishlistedProducts.length})
@@ -32,47 +53,13 @@ export const WishlistScreen = ({ navigation }) => {
         <View style={{ width: 60 }} />
       </View>
 
-      <ScrollView style={styles.body}>
-        {wishlistedProducts.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={{ fontSize: 48, marginBottom: 12 }}>🤍</Text>
-            <Text style={{ color: colors.textSecondary, fontWeight: '600', fontSize: 16 }}>
-              No products in your wishlist
-            </Text>
-          </View>
-        ) : (
-          wishlistedProducts.map((product) => (
-            <View
-              key={product.id}
-              style={[
-                styles.itemCard,
-                { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
-              ]}
-            >
-              <Image source={{ uri: product.imageUrl }} style={styles.itemImg} />
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.itemTitle, { color: colors.textPrimary }]} numberOfLines={1}>
-                  {product.title}
-                </Text>
-                <Text style={[styles.itemPrice, { color: colors.primary }]}>
-                  ₹{product.price}
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                style={[styles.moveBtn, { backgroundColor: colors.primary }]}
-                onPress={() => {
-                  dispatch(addToCart({ product, isOffline }));
-                  dispatch(toggleWishlist(product.id));
-                  dispatch(addToast({ type: 'success', title: 'Moved to Cart', message: product.title }));
-                }}
-              >
-                <Text style={styles.moveBtnText}>Move to Cart</Text>
-              </TouchableOpacity>
-            </View>
-          ))
-        )}
-      </ScrollView>
+      <VirtualizedGrid
+        data={wishlistedProducts}
+        pageSize={20}
+        keyExtractor={(item) => item.id}
+        renderItem={renderWishlistItem}
+        emptyMessage={t.noWishlistItems}
+      />
     </SafeAreaView>
   );
 };
@@ -92,6 +79,7 @@ const styles = StyleSheet.create({
   backBtn: {
     paddingVertical: 6,
     paddingHorizontal: 8,
+    transform: [{ translateY: -2 }],
   },
   headerTitle: {
     fontSize: 18,

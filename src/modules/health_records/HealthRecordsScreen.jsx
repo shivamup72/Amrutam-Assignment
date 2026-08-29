@@ -21,10 +21,10 @@ export const HealthRecordsScreen = () => {
   const t = translations[language] || translations.en;
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Records');
+  const [selectedCategory, setSelectedCategory] = useState(t.allRecords);
   const [previewRecord, setPreviewRecord] = useState(null);
 
-  const categories = ['All Records', 'Lab Report', 'Prescription', 'Consultation', 'Vaccination', 'Allergy'];
+  const categories = [t.allRecords, t.labReport, t.prescription, t.consultation, t.vaccination, t.allergy];
 
   const filteredRecords = useMemo(() => {
     let result = healthRecords;
@@ -40,7 +40,7 @@ export const HealthRecordsScreen = () => {
       );
     }
 
-    if (selectedCategory !== 'All Records') {
+    if (selectedCategory !== t.allRecords) {
       result = result.filter((r) => r.type === selectedCategory);
     }
 
@@ -69,7 +69,7 @@ export const HealthRecordsScreen = () => {
 
   const renderHeader = () => (
     <View style={styles.headerArea}>
-      <Text style={[styles.heading, { color: colors.textPrimary }]}>Health Records</Text>
+      <Text style={[styles.heading, { color: colors.textPrimary }]}>{t.healthRecordsTitle}</Text>
 
       <View style={styles.searchBox}>
         <Text style={styles.searchIcon}>🔍</Text>
@@ -120,7 +120,7 @@ export const HealthRecordsScreen = () => {
         keyExtractor={(item) => item.id}
         renderItem={renderRecordItem}
         headerComponent={renderHeader()}
-        emptyMessage="No health records found"
+        emptyMessage={t.noHealthRecordsFound || 'No health records found'}
         error={error}
         refreshing={loading === 'pending'}
         onRefresh={() => dispatch(fetchHealthRecords({ useCache: false }))}

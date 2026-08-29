@@ -5,6 +5,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { addToCart } from '../store/slices/shopSlice';
 import { addToast } from '../store/slices/devSlice';
 import { lightTheme, darkTheme } from '../theme/theme';
@@ -13,6 +14,7 @@ import { translations } from '../core/i18n/i18n';
 export const ProductDetailScreen = ({ route, navigation }) => {
   const { product } = route.params || {};
   const dispatch = useDispatch();
+  const insets = useSafeAreaInsets();
   const { isDarkMode, language, isOffline } = useSelector((state) => state.dev);
   const { cart } = useSelector((state) => state.shop);
 
@@ -22,7 +24,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
   if (!product) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={{ color: colors.textPrimary }}>Product not found</Text>
+        <Text style={{ color: colors.textPrimary }}>{t.productNotFound}</Text>
       </View>
     );
   }
@@ -33,13 +35,13 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.surfaceBorder }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={{ fontSize: 18, color: colors.textPrimary }}>← Back</Text>
+          <Text style={{ fontSize: 18, color: colors.textPrimary }}>← {t.back}</Text>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{product.category}</Text>
         <View style={{ width: 60 }} />
       </View>
 
-      <ScrollView style={styles.body}>
+      <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
         <Image source={{ uri: product.imageUrl }} style={styles.image} resizeMode="cover" />
 
         <Text style={[styles.title, { color: colors.textPrimary }]}>{product.title}</Text>
@@ -56,12 +58,12 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           ) : null}
         </View>
 
-        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Description</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{t.description}</Text>
         <Text style={[styles.description, { color: colors.textSecondary }]}>
           {product.description}
         </Text>
 
-        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Key Benefits</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>{t.keyBenefits}</Text>
         {product.benefits.map((benefit, idx) => (
           <Text key={idx} style={[styles.benefitItem, { color: colors.primary }]}>
             🌿 {benefit}
@@ -69,17 +71,26 @@ export const ProductDetailScreen = ({ route, navigation }) => {
         ))}
       </ScrollView>
 
-      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.surfaceBorder }]}>
+      <View
+        style={[
+          styles.footer,
+          {
+            backgroundColor: colors.surface,
+            borderTopColor: colors.surfaceBorder,
+            paddingBottom: Math.max(insets.bottom, 12),
+          },
+        ]}
+      >
         <TouchableOpacity
           style={[styles.addBtn, { backgroundColor: colors.primary }]}
           onPress={() => {
             dispatch(addToCart({ product, isOffline }));
-            dispatch(addToast({ type: 'success', title: 'Added to Cart', message: product.title }));
+            dispatch(addToast({ type: 'success', title: t.addedToCart, message: product.title }));
             navigation.goBack();
           }}
         >
           <Text style={styles.addBtnText}>
-            {inCartItem ? `Add More (${inCartItem.quantity} in cart)` : t.addToCart}
+            {inCartItem ? `${t.addToCart} (${inCartItem.quantity})` : t.addToCart}
           </Text>
         </TouchableOpacity>
       </View>
@@ -102,6 +113,7 @@ const styles = StyleSheet.create({
   backBtn: {
     paddingVertical: 6,
     paddingHorizontal: 8,
+    transform: [{ translateY: -2 }],
   },
   headerTitle: {
     fontSize: 16,
@@ -111,6 +123,9 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     padding: 20,
+  },
+  bodyContent: {
+    paddingBottom: 12,
   },
   image: {
     width: '100%',

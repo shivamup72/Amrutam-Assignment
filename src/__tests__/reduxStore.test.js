@@ -4,8 +4,13 @@
 
 import { store } from '../store';
 import { bookConsultationSlot } from '../store/slices/consultationsSlice';
-import { addToCart, updateCartQuantity, toggleWishlist } from '../store/slices/shopSlice';
+import {
+  addToCart,
+  updateCartQuantity,
+  toggleWishlist,
+} from '../store/slices/shopSlice';
 import { setOffline, toggleDarkMode } from '../store/slices/devSlice';
+import { translations } from '../core/i18n/i18n';
 
 describe('Redux Toolkit State Management', () => {
   test('handles dark mode and offline state toggles', () => {
@@ -19,6 +24,14 @@ describe('Redux Toolkit State Management', () => {
     store.dispatch(setOffline(true));
     state = store.getState();
     expect(state.dev.isOffline).toBe(true);
+  });
+
+  test('provides Hindi translations for shared app labels', () => {
+    expect(translations.hi.profileSettings).toBe('प्रोफ़ाइल और सेटिंग्स');
+    expect(translations.hi.myActivity).toBe('मेरी गतिविधि');
+    expect(translations.hi.appLanguage).toBe('ऐप भाषा');
+    expect(translations.hi.darkMode).toBe('डार्क मोड');
+    expect(translations.hi.biometricLock).toBe('बायोमेट्रिक लॉक');
   });
 
   test('adds product to cart and updates quantity in shop slice', () => {
@@ -62,11 +75,13 @@ describe('Redux Toolkit State Management', () => {
         doctorId: firstDoctor.id,
         slotId: firstSlot.id,
         isOffline: false,
-      })
+      }),
     );
 
     state = store.getState();
     expect(state.consultations.upcomingBookings.length).toBe(1);
-    expect(state.consultations.upcomingBookings[0].doctorId).toBe(firstDoctor.id);
+    expect(state.consultations.upcomingBookings[0].doctorId).toBe(
+      firstDoctor.id,
+    );
   });
 });

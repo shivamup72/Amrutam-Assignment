@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { bookConsultationSlot } from '../store/slices/consultationsSlice';
 import { addToast } from '../store/slices/devSlice';
 import { lightTheme, darkTheme } from '../theme/theme';
@@ -14,6 +15,7 @@ import { SlotPicker } from '../modules/consultations/SlotPicker';
 export const DoctorDetailScreen = ({ route, navigation }) => {
   const { doctor } = route.params || {};
   const dispatch = useDispatch();
+  const insets = useSafeAreaInsets();
   const { isDarkMode, language, isOffline } = useSelector((state) => state.dev || {});
   const { upcomingBookings = [] } = useSelector((state) => state.consultations || {});
 
@@ -26,14 +28,14 @@ export const DoctorDetailScreen = ({ route, navigation }) => {
   if (!doctor) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={{ color: colors.textPrimary }}>Doctor not found</Text>
+        <Text style={{ color: colors.textPrimary }}>{t.doctorNotFound}</Text>
       </View>
     );
   }
 
   const handleConfirmBooking = () => {
     if (!selectedSlotId) {
-      setValidationError('Please select an available slot to proceed');
+      setValidationError(t.pleaseSelectSlot);
       return;
     }
 
@@ -73,30 +75,30 @@ export const DoctorDetailScreen = ({ route, navigation }) => {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.surfaceBorder }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={{ fontSize: 18, color: colors.textPrimary }}>← Back</Text>
+          <Text style={{ fontSize: 18, color: colors.textPrimary }}>← {t.back}</Text>
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>Doctor Profile</Text>
+        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>{t.doctorProfile}</Text>
         <View style={{ width: 60 }} />
       </View>
 
-      <ScrollView style={styles.body}>
+      <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
         <View style={styles.docHeaderRow}>
           <Image source={{ uri: doctor.avatarUrl }} style={styles.avatar} />
           <View style={styles.headerTextCol}>
             <Text style={[styles.docName, { color: colors.textPrimary }]}>{doctor.name}</Text>
             <Text style={[styles.docSpec, { color: colors.primary }]}>{doctor.specialty}</Text>
             <Text style={[styles.docMeta, { color: colors.textMuted }]}>
-              {doctor.experienceYears} Years Exp • ⭐ {doctor.rating} Rating
+              {doctor.experienceYears} {t.yearsExp} • ⭐ {doctor.rating} {t.rating}
             </Text>
             <Text style={[styles.docMeta, { color: colors.textMuted }]}>
-              Location: {doctor.location}
+              {t.doctorLocation}: {doctor.location}
             </Text>
           </View>
         </View>
 
         <View style={[styles.feeCard, { backgroundColor: colors.badgeBg }]}>
           <Text style={[styles.feeTitle, { color: colors.textSecondary }]}>
-            Video Consultation Fee
+            {t.videoConsultationFee}
           </Text>
           <Text style={[styles.feeAmount, { color: colors.textPrimary }]}>
             ₹{doctor.consultationFee}
@@ -119,7 +121,16 @@ export const DoctorDetailScreen = ({ route, navigation }) => {
         ) : null}
       </ScrollView>
 
-      <View style={[styles.footer, { backgroundColor: colors.surface, borderTopColor: colors.surfaceBorder }]}>
+      <View
+        style={[
+          styles.footer,
+          {
+            backgroundColor: colors.surface,
+            borderTopColor: colors.surfaceBorder,
+            paddingBottom: Math.max(insets.bottom, 12),
+          },
+        ]}
+      >
         <TouchableOpacity
           style={[styles.confirmBtn, { backgroundColor: colors.primary }]}
           onPress={handleConfirmBooking}
@@ -146,6 +157,7 @@ const styles = StyleSheet.create({
   backBtn: {
     paddingVertical: 6,
     paddingHorizontal: 8,
+    transform: [{ translateY: -2 }],
   },
   headerTitle: {
     fontSize: 18,
@@ -154,6 +166,9 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     padding: 20,
+  },
+  bodyContent: {
+    paddingBottom: 12,
   },
   docHeaderRow: {
     flexDirection: 'row',

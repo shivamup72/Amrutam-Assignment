@@ -3,15 +3,15 @@
  * Styled matching AyurWellness Mockups (Pill Active Tab & Clean Soft Bar)
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { setActiveTab } from '../store/slices/devSlice';
 import { lightTheme, darkTheme } from '../theme/theme';
+import { translations } from '../core/i18n/i18n';
 import { Header } from '../components/Header';
 
 // Screens Imports
@@ -38,27 +38,27 @@ const Tab = createBottomTabNavigator();
 
 const CustomTabBar = memo(({ state, descriptors, navigation }) => {
   const insets = useSafeAreaInsets();
-  const dispatch = useDispatch();
-  const { isDarkMode } = useSelector((state) => state.dev || {});
+  const { isDarkMode, language } = useSelector((state) => state.dev || {});
+  const t = translations[language] || translations.en;
 
   const bottomPadding = Math.max(insets.bottom, 8);
 
   const tabsConfig = [
     {
       name: 'Consultations',
-      label: 'Consult',
+      label: t.consultations,
       activeIcon: '➕',
       inactiveIcon: '🩺',
     },
     {
       name: 'Shop',
-      label: 'Shop',
+      label: t.shop,
       activeIcon: '🛍️',
       inactiveIcon: '🛍️',
     },
     {
       name: 'HealthRecords',
-      label: 'Records',
+      label: t.healthRecords,
       activeIcon: '📄',
       inactiveIcon: '📋',
     },
@@ -87,10 +87,6 @@ const CustomTabBar = memo(({ state, descriptors, navigation }) => {
             });
 
             if (!isFocused && !event.defaultPrevented) {
-              if (route.name === 'Consultations') dispatch(setActiveTab('consultations'));
-              else if (route.name === 'Shop') dispatch(setActiveTab('shop'));
-              else if (route.name === 'HealthRecords') dispatch(setActiveTab('health_records'));
-
               navigation.navigate(route.name);
             }
           };
@@ -144,23 +140,42 @@ function BottomTabs() {
   );
 }
 
-export const AppNavigator = () => {
+const AppNavigatorContent = ({ shouldShowAppHeader }) => {
   return (
-    <NavigationContainer ref={navigationRef}>
-      <View style={styles.container}>
-        <Header />
-        <View style={styles.body}>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="MainTabs" component={BottomTabs} />
-            <Stack.Screen name="DoctorDetail" component={DoctorDetailScreen} />
-            <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
-            <Stack.Screen name="Cart" component={CartScreen} />
-            <Stack.Screen name="Wishlist" component={WishlistScreen} />
-            <Stack.Screen name="Checkout" component={CheckoutScreen} />
-            <Stack.Screen name="UpcomingBookings" component={UpcomingBookingsScreen} />
-          </Stack.Navigator>
-        </View>
+    <View style={styles.container}>
+      {shouldShowAppHeader ? <Header /> : null}
+      <View style={styles.body}>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="MainTabs" component={BottomTabs} />
+          <Stack.Screen name="DoctorDetail" component={DoctorDetailScreen} />
+          <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+          <Stack.Screen name="Cart" component={CartScreen} />
+          <Stack.Screen name="Wishlist" component={WishlistScreen} />
+          <Stack.Screen name="Checkout" component={CheckoutScreen} />
+          <Stack.Screen name="UpcomingBookings" component={UpcomingBookingsScreen} />
+        </Stack.Navigator>
       </View>
+    </View>
+  );
+};
+
+export const AppNavigator = () => {
+  const [currentRouteName, setCurrentRouteName] = useState('Consultations');
+  const shouldShowAppHeader = ['Consultations', 'Shop', 'HealthRecords'].includes(currentRouteName);
+
+  const handleNavigationStateChange = (state) => {
+    let route = state?.routes?.[state.index];
+
+    while (route?.state?.routes?.length) {
+      route = route.state.routes[route.state.index];
+    }
+
+    setCurrentRouteName(route?.name || 'Consultations');
+  };
+
+  return (
+    <NavigationContainer ref={navigationRef} onStateChange={handleNavigationStateChange}>
+      <AppNavigatorContent shouldShowAppHeader={shouldShowAppHeader} />
     </NavigationContainer>
   );
 };
