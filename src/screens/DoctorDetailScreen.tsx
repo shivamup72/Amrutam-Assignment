@@ -81,7 +81,7 @@ export const DoctorDetailScreen = ({ route, navigation }) => {
         <View style={{ width: 60 }} />
       </View>
 
-      <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
+      <ScrollView style={styles.body} showsVerticalScrollIndicator={false} contentContainerStyle={styles.bodyContent}>
         <View style={styles.docHeaderRow}>
           <Image source={{ uri: doctor.avatarUrl }} style={styles.avatar} />
           <View style={styles.headerTextCol}>

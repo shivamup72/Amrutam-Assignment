@@ -2,69 +2,114 @@
  * Health Records Dashboard Screen (Virtualized Grid with Infinite Scroll & Grouping)
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { lightTheme, darkTheme } from '../../theme/theme';
 import { translations } from '../../core/i18n/i18n';
 import { RecordCard } from './RecordCard';
-import { VirtualizedGrid } from '../../components/VirtualizedGrid';
+import { PaginatedFlatList } from '../../components/PaginatedFlatList';
+import { HealthRecordSkeleton } from '../../components/Skeleton';
 import { AttachmentViewerModal } from '../../components/AttachmentViewerModal';
-import { fetchHealthRecords } from '../../store/slices/healthRecordsSlice';
+import { fetchHealthRecords, resetHealthRecordsState } from '../../store/slices/healthRecordsSlice';
 
 export const HealthRecordsScreen = () => {
   const dispatch = useDispatch();
   const { isDarkMode, language } = useSelector((state) => state.dev || {});
-  const { healthRecords = [], loading, error } = useSelector((state) => state.healthRecords || {});
+  const { healthRecords = [], loading, error, hasNextPage = true } = useSelector((state) => state.healthRecords || {});
 
   const colors = isDarkMode ? darkTheme : lightTheme;
   const t = translations[language] || translations.en;
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(t.allRecords);
   const [previewRecord, setPreviewRecord] = useState(null);
+  const [page, setPage] = useState(1);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  const requestLockRef = useRef(false);
+  const requestIdRef = useRef(0);
+
+  // Debounce search query input (400ms)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Main data fetching function
+  const loadRecordsData = useCallback(async (targetPage: number, reset = false) => {
+    if (requestLockRef.current || (targetPage > 1 && !hasNextPage)) return;
+
+    requestLockRef.current = true;
+    const currentRequestId = ++requestIdRef.current;
+
+    if ((reset || targetPage === 1) && healthRecords.length === 0) {
+      setIsInitialLoading(true);
+    } else if (targetPage > 1) {
+      setIsFetchingMore(true);
+    }
+
+    try {
+      await dispatch(
+        fetchHealthRecords({
+          page: targetPage,
+          limit: 10,
+          search: debouncedSearch,
+          category: selectedCategory,
+          reset,
+        }) as any
+      ).unwrap();
+
+      if (requestIdRef.current === currentRequestId) {
+        setPage(targetPage);
+      }
+    } catch (err) {
+      // Error handled in Redux state
+    } finally {
+      if (requestIdRef.current === currentRequestId) {
+        requestLockRef.current = false;
+        setIsFetchingMore(false);
+        setIsInitialLoading(false);
+      }
+    }
+  }, [dispatch, debouncedSearch, selectedCategory, hasNextPage, healthRecords.length]);
+
+  // Reset and fetch page 1 when filter or debounced search changes
+  useEffect(() => {
+    dispatch(resetHealthRecordsState());
+    setPage(1);
+    loadRecordsData(1, true);
+  }, [debouncedSearch, selectedCategory]);
+
+  const handleCategorySelect = (cat: string) => {
+    if (selectedCategory !== cat) {
+      setSelectedCategory(cat);
+    }
+  };
 
   const categories = [t.allRecords, t.labReport, t.prescription, t.consultation, t.vaccination, t.allergy];
 
-  const filteredRecords = useMemo(() => {
-    let result = healthRecords;
-
-    if (searchQuery.trim().length > 0) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (r) =>
-          r.title?.toLowerCase().includes(q) ||
-          r.doctorName?.toLowerCase().includes(q) ||
-          r.type?.toLowerCase().includes(q) ||
-          r.tags?.some((tag) => tag.toLowerCase().includes(q))
-      );
-    }
-
-    if (selectedCategory !== t.allRecords) {
-      result = result.filter((r) => r.type === selectedCategory);
-    }
-
-    // Sort latest record at top (date descending)
-    return [...result].sort((a, b) => b.date.localeCompare(a.date));
-  }, [healthRecords, searchQuery, selectedCategory]);
-
   const renderRecordItem = useCallback(
     ({ item, index }) => {
-      const prevItem = index > 0 ? filteredRecords[index - 1] : null;
+      const prevItem = index > 0 ? healthRecords[index - 1] : null;
       const isNewMonth = !prevItem || prevItem.monthYear !== item.monthYear;
 
       return (
         <View style={styles.recordWrapper}>
           {isNewMonth ? (
             <Text style={[styles.monthHeader, { color: colors.textPrimary }]}>
-              {item.monthYear || 'October 2024'}
+              {item.monthYear || 'October 2026'}
             </Text>
           ) : null}
           <RecordCard record={item} onPreviewAttachment={setPreviewRecord} />
         </View>
       );
     },
-    [filteredRecords, colors]
+    [healthRecords, colors]
   );
 
   const renderHeader = () => (
@@ -72,7 +117,7 @@ export const HealthRecordsScreen = () => {
       <Text style={[styles.heading, { color: colors.textPrimary }]}>{t.healthRecordsTitle}</Text>
 
       <View style={styles.searchBox}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Image source={require('../../assest/images/search.png')} style={styles.searchIconImage} />
         <TextInput
           style={styles.searchInput}
           placeholder={t.searchRecords || 'Search reports, prescriptions, doctors...'}
@@ -89,6 +134,7 @@ export const HealthRecordsScreen = () => {
 
       <ScrollView
         horizontal
+        showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoryScroll}
       >
@@ -99,7 +145,7 @@ export const HealthRecordsScreen = () => {
               key={cat}
               activeOpacity={0.8}
               style={[styles.chip, isActive ? styles.chipActive : styles.chipInactive]}
-              onPress={() => setSelectedCategory(cat)}
+              onPress={() => handleCategorySelect(cat)}
             >
               <Text style={[styles.chipText, isActive ? styles.chipTextActive : styles.chipTextInactive]}>
                 {cat}
@@ -113,17 +159,20 @@ export const HealthRecordsScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <VirtualizedGrid
-        data={filteredRecords}
+      <PaginatedFlatList
+        data={healthRecords}
         numColumns={1}
-        pageSize={24}
         keyExtractor={(item) => item.id}
         renderItem={renderRecordItem}
         headerComponent={renderHeader()}
-        emptyMessage={t.noHealthRecordsFound || 'No health records found'}
+        isInitialLoading={isInitialLoading && healthRecords.length === 0}
+        isFetchingMore={isFetchingMore}
+        hasMore={hasNextPage}
+        emptyMessage="No health records found"
+        onLoadMore={() => loadRecordsData(page + 1, false)}
+        onRetry={() => loadRecordsData(1, true)}
+        renderSkeleton={() => <HealthRecordSkeleton />}
         error={error}
-        refreshing={loading === 'pending'}
-        onRefresh={() => dispatch(fetchHealthRecords({ useCache: false }))}
       />
 
       <AttachmentViewerModal
@@ -163,10 +212,10 @@ const styles = StyleSheet.create({
     borderColor: '#E2DCD5',
     marginBottom: 14,
   },
-  searchIcon: {
-    fontSize: 16,
+  searchIconImage: {
+    width: 24,
+    height: 24,
     marginRight: 10,
-    color: '#78716C',
   },
   searchInput: {
     flex: 1,

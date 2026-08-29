@@ -98,6 +98,7 @@ export const LanguageModal = ({ visible, onClose }) => {
                 data={LANGUAGES}
                 keyExtractor={(item) => item.code}
                 renderItem={renderItem}
+                showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.listContent}
               />
             </View>

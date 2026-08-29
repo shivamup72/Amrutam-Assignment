@@ -3,7 +3,7 @@
  */
 
 import { store } from '../store';
-import { bookConsultationSlot } from '../store/slices/consultationsSlice';
+import { bookConsultationSlot, fetchDoctors } from '../store/slices/consultationsSlice';
 import {
   addToCart,
   updateCartQuantity,
@@ -67,7 +67,8 @@ describe('Redux Toolkit State Management', () => {
     expect(state.shop.wishlistIds).not.toContain('prod_test_1');
   });
 
-  test('books consultation slot in consultations slice', () => {
+  test('books consultation slot in consultations slice', async () => {
+    await store.dispatch(fetchDoctors({ page: 1, limit: 10 }));
     let state = store.getState();
     const firstDoctor = state.consultations.doctors[0];
     const firstSlot = firstDoctor.slots[0];
@@ -85,6 +86,13 @@ describe('Redux Toolkit State Management', () => {
     expect(state.consultations.upcomingBookings[0].doctorId).toBe(
       firstDoctor.id,
     );
+  });
+
+  test('appends exactly ten doctors when the next page is fetched', async () => {
+    await store.dispatch(fetchDoctors({ page: 1, limit: 10 }));
+    await store.dispatch(fetchDoctors({ page: 2, limit: 10 }));
+    expect(store.getState().consultations.doctors).toHaveLength(20);
+    expect(store.getState().consultations.doctors[10].id).toBe('doc_11');
   });
 
   test('generates stable datasets with the expected item shapes', () => {

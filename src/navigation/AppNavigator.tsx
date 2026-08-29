@@ -1,10 +1,5 @@
-/**
- * Navigation Engine with Custom Bottom Tabs
- * Styled matching AyurWellness Mockups (Pill Active Tab & Clean Soft Bar)
- */
-
 import React, { memo, useCallback, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -47,20 +42,17 @@ const CustomTabBar = memo(({ state, descriptors, navigation }) => {
     {
       name: 'Consultations',
       label: t.consultations,
-      activeIcon: '➕',
-      inactiveIcon: '🩺',
+      icon: require('../assest/images/consultant.png'),
     },
     {
       name: 'Shop',
       label: t.shop,
-      activeIcon: '🛍️',
-      inactiveIcon: '🛍️',
+      icon: require('../assest/images/shop.jpg'),
     },
     {
       name: 'HealthRecords',
       label: t.healthRecords,
-      activeIcon: '📄',
-      inactiveIcon: '📋',
+      icon: require('../assest/images/medicalrecord.jpg'),
     },
   ];
 
@@ -100,14 +92,16 @@ const CustomTabBar = memo(({ state, descriptors, navigation }) => {
             >
               {isFocused ? (
                 <View style={[styles.activePill, { backgroundColor: isDarkMode ? '#3A643B' : '#2D5B30' }]}>
-                  <Text style={styles.activeIconText}>{config.activeIcon}</Text>
+                  <Image source={config.icon} style={styles.activeTabImage} resizeMode="contain" />
                   <Text style={styles.activeLabelText}>{config.label}</Text>
                 </View>
               ) : (
                 <View style={styles.inactiveItem}>
-                  <Text style={[styles.inactiveIconText, { color: isDarkMode ? '#94A3B8' : '#475569' }]}>
-                    {config.inactiveIcon}
-                  </Text>
+                  <Image
+                    source={config.icon}
+                    style={[styles.inactiveTabImage, { opacity: isDarkMode ? 0.6 : 0.75 }]}
+                    resizeMode="contain"
+                  />
                   <Text style={[styles.inactiveLabelText, { color: isDarkMode ? '#94A3B8' : '#475569' }]}>
                     {config.label}
                   </Text>
@@ -210,29 +204,32 @@ const styles = StyleSheet.create({
   },
   activePill: {
     borderRadius: 22,
-    paddingHorizontal: 18,
-    paddingVertical: 7,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 84,
+    minWidth: 88,
   },
-  activeIconText: {
-    fontSize: 16,
-    color: '#FFFFFF',
+  activeTabImage: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+  },
+  inactiveTabImage: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
   },
   activeLabelText: {
     fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
-    marginTop: 1,
+    marginTop: 2,
   },
   inactiveItem: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 6,
-  },
-  inactiveIconText: {
-    fontSize: 16,
   },
   inactiveLabelText: {
     fontSize: 11,

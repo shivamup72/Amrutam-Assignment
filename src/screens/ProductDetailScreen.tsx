@@ -41,7 +41,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
         <View style={{ width: 60 }} />
       </View>
 
-      <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
+      <ScrollView style={styles.body} showsVerticalScrollIndicator={false} contentContainerStyle={styles.bodyContent}>
         <Image source={{ uri: product.imageUrl }} style={styles.image} resizeMode="cover" />
 
         <Text style={[styles.title, { color: colors.textPrimary }]}>{product.title}</Text>

@@ -2,14 +2,15 @@
  * Consultations Module Main Screen (Styled matching AyurWellness Mockups)
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, useWindowDimensions, Image } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { lightTheme, darkTheme } from '../../theme/theme';
 import { translations } from '../../core/i18n/i18n';
 import { DoctorCard } from './DoctorCard';
-import { VirtualizedGrid } from '../../components/VirtualizedGrid';
-import { fetchDoctors } from '../../store/slices/consultationsSlice';
+import { PaginatedFlatList } from '../../components/PaginatedFlatList';
+import { DashboardSkeleton } from '../../components/Skeleton';
+import { fetchDoctors, resetDoctorsState } from '../../store/slices/consultationsSlice';
 
 export const ConsultationsScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -17,37 +18,81 @@ export const ConsultationsScreen = ({ navigation }) => {
   const numColumns = width >= 1024 ? 2 : 1;
 
   const { isDarkMode, language } = useSelector((state) => state.dev || {});
-  const { doctors = [], loading, error } = useSelector((state) => state.consultations || {});
+  const { doctors = [], loading, error, hasNextPage = true } = useSelector((state) => state.consultations || {});
 
   const colors = isDarkMode ? darkTheme : lightTheme;
   const t = translations[language] || translations.en;
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(t.allDoctors);
+  const [page, setPage] = useState(1);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  const requestLockRef = useRef(false);
+  const requestIdRef = useRef(0);
+
+  // Debounce search query input (400ms)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Main data fetching function
+  const loadDoctorsData = useCallback(async (targetPage: number, reset = false) => {
+    if (requestLockRef.current || (targetPage > 1 && !hasNextPage)) return;
+
+    requestLockRef.current = true;
+    const currentRequestId = ++requestIdRef.current;
+
+    if ((reset || targetPage === 1) && doctors.length === 0) {
+      setIsInitialLoading(true);
+    } else if (targetPage > 1) {
+      setIsFetchingMore(true);
+    }
+
+    try {
+      await dispatch(
+        fetchDoctors({
+          page: targetPage,
+          limit: 10,
+          search: debouncedSearch,
+          category: selectedCategory,
+          reset,
+        }) as any
+      ).unwrap();
+
+      if (requestIdRef.current === currentRequestId) {
+        setPage(targetPage);
+      }
+    } catch (err) {
+      // Error handled by Redux state
+    } finally {
+      if (requestIdRef.current === currentRequestId) {
+        requestLockRef.current = false;
+        setIsFetchingMore(false);
+        setIsInitialLoading(false);
+      }
+    }
+  }, [dispatch, debouncedSearch, selectedCategory, hasNextPage, doctors.length]);
+
+  // Reset and fetch page 1 when filter or debounced search changes
+  useEffect(() => {
+    dispatch(resetDoctorsState());
+    setPage(1);
+    loadDoctorsData(1, true);
+  }, [debouncedSearch, selectedCategory]);
+
+  const handleCategorySelect = (cat: string) => {
+    if (selectedCategory !== cat) {
+      setSelectedCategory(cat);
+    }
+  };
 
   const categories = [t.allDoctors, t.ayurveda, t.yoga, t.dietNutrition, t.panchakarma];
-
-  const filteredDoctors = useMemo(() => {
-    let result = doctors;
-
-    if (searchQuery.trim().length > 0) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (d) =>
-          d.name?.toLowerCase().includes(q) ||
-          d.specialty?.toLowerCase().includes(q) ||
-          d.location?.toLowerCase().includes(q)
-      );
-    }
-
-    if (selectedCategory !== t.allDoctors) {
-      result = result.filter((d) =>
-        d.specialty?.toLowerCase().includes(selectedCategory.toLowerCase().split(' ')[0])
-      );
-    }
-
-    return result;
-  }, [doctors, searchQuery, selectedCategory]);
 
   const renderDoctorItem = useCallback(
     ({ item }) => (
@@ -65,7 +110,7 @@ export const ConsultationsScreen = ({ navigation }) => {
     <View style={styles.headerArea}>
       {/* Search Input matching Mockup Image 2 */}
       <View style={styles.searchBox}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <Image source={require('../../assest/images/search.png')} style={styles.searchIconImage} />
         <TextInput
           style={styles.searchInput}
           placeholder={t.searchDoctorsPlaceholder || 'Search doctors, specialties...'}
@@ -83,6 +128,7 @@ export const ConsultationsScreen = ({ navigation }) => {
       {/* Category Chips matching Mockup Image 2 */}
       <ScrollView
         horizontal
+        showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoryScroll}
       >
@@ -96,7 +142,7 @@ export const ConsultationsScreen = ({ navigation }) => {
                 styles.chip,
                 isActive ? styles.chipActive : styles.chipInactive,
               ]}
-              onPress={() => setSelectedCategory(cat)}
+              onPress={() => handleCategorySelect(cat)}
             >
               <Text
                 style={[
@@ -120,16 +166,20 @@ export const ConsultationsScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <VirtualizedGrid
-        data={filteredDoctors}
+      <PaginatedFlatList
+        data={doctors}
         numColumns={numColumns}
         keyExtractor={(item) => item.id}
         renderItem={renderDoctorItem}
         headerComponent={renderHeader()}
-        emptyMessage={t.noDoctorsFound || 'No doctors matching search criteria'}
+        isInitialLoading={isInitialLoading && doctors.length === 0}
+        isFetchingMore={isFetchingMore}
+        hasMore={hasNextPage}
+        emptyMessage="No consultation found"
+        onLoadMore={() => loadDoctorsData(page + 1, false)}
+        onRetry={() => loadDoctorsData(1, true)}
+        renderSkeleton={() => <DashboardSkeleton />}
         error={error}
-        refreshing={loading === 'pending'}
-        onRefresh={() => dispatch(fetchDoctors({ useCache: false }))}
       />
     </View>
   );
@@ -155,10 +205,10 @@ const styles = StyleSheet.create({
     borderColor: '#E2DCD5',
     marginBottom: 14,
   },
-  searchIcon: {
-    fontSize: 16,
+  searchIconImage: {
+    width: 24,
+    height: 24,
     marginRight: 10,
-    color: '#78716C',
   },
   searchInput: {
     flex: 1,

@@ -47,9 +47,12 @@ export const WishlistScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Text style={{ fontSize: 18, color: colors.textPrimary }}>← {t.back}</Text>
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
-          ❤️ {t.wishlist} ({wishlistedProducts.length})
-        </Text>
+        <View style={styles.titleContainer}>
+          <Image source={require('../assest/images/whishlistfullfill.jpg')} style={styles.headerWishlistIcon} />
+          <Text style={[styles.headerTitle, { color: colors.textPrimary }]}>
+            {t.wishlist} ({wishlistedProducts.length})
+          </Text>
+        </View>
         <View style={{ width: 60 }} />
       </View>
 
@@ -80,6 +83,16 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 8,
     transform: [{ translateY: -2 }],
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  headerWishlistIcon: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
   },
   headerTitle: {
     fontSize: 18,

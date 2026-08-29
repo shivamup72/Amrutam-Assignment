@@ -3,7 +3,7 @@
  */
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { generateDoctors } from '../../data/mockGenerator';
+import { fetchFilteredDoctors } from '../../data/mockGenerator';
 import { apiClient } from '../../core/api/apiClient';
 import { offlineEngine } from '../../core/offline/offlineEngine';
 import { localStorage, STORAGE_KEYS } from '../../storage/storage';
@@ -12,12 +12,24 @@ export const fetchDoctors = createAsyncThunk(
   'consultations/fetchDoctors',
   async (options = {}, { rejectWithValue }) => {
     try {
+      const page = options.page || 1;
+      const limit = options.limit || 10;
+      const search = options.search || '';
+      const category = options.category || '';
       const response = await apiClient.request(
-        'doctors',
-        () => generateDoctors(5000),
+        `doctors?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`,
+        () => fetchFilteredDoctors({ page, limit, search, category }),
         options,
       );
-      return response.data;
+      return {
+        data: response.data.data || [],
+        total: response.data.total || 0,
+        page: response.data.page || page,
+        limit: response.data.limit || limit,
+        totalPages: response.data.totalPages || 0,
+        hasNextPage: !!response.data.hasNextPage,
+        reset: !!options.reset || page === 1,
+      };
     } catch (err) {
       return rejectWithValue(err.message || 'Failed to fetch doctors');
     }
@@ -25,10 +37,13 @@ export const fetchDoctors = createAsyncThunk(
 );
 
 const initialState = {
-  doctors: generateDoctors(5000),
+  doctors: [],
   upcomingBookings: [],
   loading: 'idle', // 'idle' | 'pending' | 'succeeded' | 'failed'
   error: null,
+  hasNextPage: true,
+  page: 1,
+  total: 0,
 };
 
 const consultationsSlice = createSlice({
@@ -37,6 +52,14 @@ const consultationsSlice = createSlice({
   reducers: {
     setDoctors: (state, action) => {
       state.doctors = action.payload;
+    },
+    resetDoctorsState: (state) => {
+      state.doctors = [];
+      state.loading = 'idle';
+      state.error = null;
+      state.hasNextPage = true;
+      state.page = 1;
+      state.total = 0;
     },
     bookConsultationSlot: (state, action) => {
       const { doctorId, slotId, isOffline } = action.payload;
@@ -105,7 +128,17 @@ const consultationsSlice = createSlice({
       })
       .addCase(fetchDoctors.fulfilled, (state, action) => {
         state.loading = 'succeeded';
-        state.doctors = action.payload;
+        const newDoctors = action.payload.data || [];
+        if (action.payload.reset || action.payload.page === 1) {
+          state.doctors = newDoctors;
+        } else {
+          const existingIds = new Set(state.doctors.map(d => d.id));
+          const filteredNew = newDoctors.filter(d => !existingIds.has(d.id));
+          state.doctors.push(...filteredNew);
+        }
+        state.hasNextPage = action.payload.hasNextPage;
+        state.page = action.payload.page;
+        state.total = action.payload.total;
       })
       .addCase(fetchDoctors.rejected, (state, action) => {
         state.loading = 'failed';
@@ -134,6 +167,7 @@ const consultationsReducer = (state, action) => {
 
 export const {
   setDoctors,
+  resetDoctorsState,
   bookConsultationSlot,
   cancelConsultationBooking,
   setUpcomingBookings,

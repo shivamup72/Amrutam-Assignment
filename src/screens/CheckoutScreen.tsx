@@ -40,7 +40,7 @@ export const CheckoutScreen = ({ route, navigation }) => {
         <View style={{ width: 60 }} />
       </View>
 
-      <ScrollView style={styles.body}>
+      <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
         <View style={[styles.box, { backgroundColor: colors.badgeBg }]}>
           <Text style={[styles.boxTitle, { color: colors.textPrimary }]}>{t.orderSummary}</Text>
           <Text style={[styles.boxSub, { color: colors.textSecondary }]}>

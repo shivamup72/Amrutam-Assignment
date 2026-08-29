@@ -1,25 +1,23 @@
 /**
- * Shop Product Card Component (Styled after AyurWellness Mockups)
+ * Shop Product Card Component (Styled matching AyurWellness Mockups)
  */
 
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { addToCart, toggleWishlist } from '../../store/slices/shopSlice';
-import { addToast } from '../../store/slices/devSlice';
+import { toggleWishlist } from '../../store/slices/shopSlice';
 import { lightTheme, darkTheme } from '../../theme/theme';
 import { translations } from '../../core/i18n/i18n';
 
 export const ProductCard = memo(({ product, onSelect }) => {
   const dispatch = useDispatch();
-  const { isDarkMode, language, isOffline } = useSelector((state) => state.dev || {});
-  const { cart = [], wishlistIds = [] } = useSelector((state) => state.shop || {});
+  const { isDarkMode, language } = useSelector((state) => state.dev || {});
+  const { wishlistIds = [] } = useSelector((state) => state.shop || {});
 
   const colors = isDarkMode ? darkTheme : lightTheme;
   const t = translations[language] || translations.en;
 
   const isWishlisted = (wishlistIds || []).includes(product.id);
-  const inCartItem = (cart || []).find((item) => item.product?.id === product.id);
 
   return (
     <TouchableOpacity
@@ -29,7 +27,7 @@ export const ProductCard = memo(({ product, onSelect }) => {
         styles.card,
         {
           backgroundColor: colors.cardBg,
-          borderColor: colors.cardBorder,
+          borderColor: isDarkMode ? '#334155' : '#EAE5DF',
         },
       ]}
     >
@@ -37,45 +35,36 @@ export const ProductCard = memo(({ product, onSelect }) => {
       <View style={styles.imageWrapper}>
         <Image source={{ uri: product.imageUrl }} style={styles.image} resizeMode="cover" />
         <TouchableOpacity
+          activeOpacity={0.8}
           style={styles.wishlistBtn}
           onPress={(e) => {
             e.stopPropagation();
             dispatch(toggleWishlist(product.id));
           }}
         >
-          <Text style={{ fontSize: 14 }}>{isWishlisted ? '❤️' : '🤍'}</Text>
+          <Image
+            source={
+              isWishlisted
+                ? require('../../assest/images/whishlistfullfill.jpg')
+                : require('../../assest/images/whishlistOutline.jpeg')
+            }
+            style={styles.wishlistIconImage}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
+      {/* Content matching Mockup Image */}
       <View style={styles.content}>
         <Text style={[styles.title, { color: colors.textPrimary }]} numberOfLines={2}>
           {product.title}
         </Text>
-        <Text style={[styles.subtitle, { color: colors.textMuted }]} numberOfLines={1}>
-          {product.category || 'Ayurvedic Formula'}
+        <Text style={styles.categoryLabel} numberOfLines={1}>
+          {product.category || 'Hair Care'}
         </Text>
-
-        <View style={styles.bottomRow}>
-          <Text style={[styles.price, { color: colors.textPrimary }]}>
-            ${product.price ? product.price.toFixed(2) : '28.00'}
-          </Text>
-
-          {/* Plus Circle Add Button */}
-          <TouchableOpacity
-            style={[
-              styles.addCircleBtn,
-              { backgroundColor: inCartItem ? colors.primaryHover || '#2D5B30' : colors.primary },
-            ]}
-            onPress={(e) => {
-              e.stopPropagation();
-              dispatch(addToCart({ product, isOffline }));
-              dispatch(addToast({ type: 'success', title: 'Added to Cart', message: product.title }));
-            }}
-          >
-            <Text style={styles.plusText}>{inCartItem ? '✓' : '+'}</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={[styles.price, { color: colors.textPrimary }]}>
+          ${product.price ? product.price.toFixed(2) : '339.00'}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -85,25 +74,25 @@ ProductCard.displayName = 'ProductCard';
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
     padding: 10,
-    marginBottom: 14,
+    marginBottom: 16,
     shadowColor: '#0F172A',
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
   },
   imageWrapper: {
     position: 'relative',
-    borderRadius: 16,
+    borderRadius: 14,
     overflow: 'hidden',
   },
   image: {
     width: '100%',
     height: 140,
-    borderRadius: 16,
+    borderRadius: 14,
     backgroundColor: '#F1F5F9',
   },
   wishlistBtn: {
@@ -111,57 +100,42 @@ const styles = StyleSheet.create({
     top: 8,
     right: 8,
     zIndex: 10,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  content: {
-    paddingTop: 10,
-    paddingHorizontal: 4,
-    paddingBottom: 4,
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: '800',
-    lineHeight: 18,
-  },
-  subtitle: {
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  bottomRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  price: {
-    fontSize: 16,
-    fontWeight: '900',
-  },
-  addCircleBtn: {
+    backgroundColor: '#FFFFFF',
     width: 32,
     height: 32,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#2D5B30',
-    shadowOpacity: 0.2,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
-  plusText: {
-    color: '#FFFFFF',
-    fontSize: 18,
+  wishlistIconImage: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+  },
+  content: {
+    paddingTop: 10,
+    paddingHorizontal: 2,
+    paddingBottom: 2,
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: '800',
+    lineHeight: 18,
+    minHeight: 36,
+  },
+  categoryLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#2D5B30',
+    marginTop: 4,
+  },
+  price: {
+    fontSize: 16,
     fontWeight: '900',
-    lineHeight: 20,
+    marginTop: 6,
   },
 });

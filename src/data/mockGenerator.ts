@@ -36,11 +36,12 @@ const PRODUCT_PREFIXES = [
 const PRODUCT_TYPES = ['Malt', 'Hair Oil', 'Syrup', 'Gold Dust', 'Capsules', 'Shampoo', 'Teas', 'Body Butter'];
 
 // Generate 5,000 Doctors
-export function generateDoctors(count = 5000) {
+export function generateDoctors(count = 5000, offset = 0) {
   const doctors = [];
   const todayStr = new Date().toISOString().split('T')[0];
 
-  for (let i = 1; i <= count; i++) {
+  for (let index = 0; index < count; index++) {
+    const i = offset + index + 1;
     const firstName = FIRST_NAMES[i % FIRST_NAMES.length];
     const lastName = LAST_NAMES[(i * 3) % LAST_NAMES.length];
     const specialty = SPECIALTIES[i % SPECIALTIES.length];
@@ -75,14 +76,15 @@ export function generateDoctors(count = 5000) {
 }
 
 // Generate 20,000 Products
-export function generateProducts(count = 20000) {
+export function generateProducts(count = 20000, offset = 0) {
   const products = [];
   const categories = [
     'Chyawanprash', 'Hair Care', 'Skin & Beauty', 'Supplements', 'Teas & Juices', 'Oil & Ghee'
   ];
   const dosageForms = ['Syrup', 'Tablet', 'Oil', 'Powder', 'Capsule'];
 
-  for (let i = 1; i <= count; i++) {
+  for (let index = 0; index < count; index++) {
+    const i = offset + index + 1;
     const prefix = PRODUCT_PREFIXES[i % PRODUCT_PREFIXES.length];
     const type = PRODUCT_TYPES[i % PRODUCT_TYPES.length];
     const category = categories[i % categories.length];
@@ -173,3 +175,151 @@ export function generateHealthRecords(itemsPerMonth = 50) {
 
   return records;
 }
+
+export function generateHealthRecordsPage(offset = 0, count = 10) {
+  const recordTypes = ['Lab Report', 'Prescription', 'Consultation', 'Vaccination', 'Allergy'];
+  const records = [];
+
+  for (let index = 0; index < count && offset + index < 10000; index++) {
+    const id = offset + index + 1;
+    const monthIndex = Math.floor((id - 1) / 334);
+    const month = ['October', 'September', 'August'][Math.min(monthIndex, 2)];
+    const monthNumber = String(Math.max(8, 10 - monthIndex)).padStart(2, '0');
+    const type = recordTypes[id % recordTypes.length];
+    records.push({
+      id: `rec_${id}`,
+      title: `${type} #${id}`,
+      type,
+      date: `2026-${monthNumber}-${String(((id - 1) % 28) + 1).padStart(2, '0')}`,
+      monthYear: `${month} 2026`,
+      doctorName: `Dr. ${FIRST_NAMES[id % FIRST_NAMES.length]} ${LAST_NAMES[id % LAST_NAMES.length]}`,
+      tags: ['#ayurveda', '#health'],
+      attachmentType: id % 2 === 0 ? 'image' : undefined,
+      attachmentUrl: id % 2 === 0 ? 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&auto=format&fit=crop&q=80' : undefined,
+    });
+  }
+
+  return records;
+}
+
+// Server-side Filtering & Pagination Helpers
+export function fetchFilteredDoctors({ page = 1, limit = 10, search = '', category = '' } = {}) {
+  const allDoctors = generateDoctors(500, 0);
+  let filtered = allDoctors;
+
+  if (category && !category.toLowerCase().includes('all') && !category.toLowerCase().includes('सभी')) {
+    const catLower = category.toLowerCase().split(' ')[0];
+    filtered = filtered.filter(
+      (d) =>
+        d.specialty?.toLowerCase().includes(catLower) ||
+        d.name?.toLowerCase().includes(catLower)
+    );
+  }
+
+  if (search && search.trim().length > 0) {
+    const q = search.trim().toLowerCase();
+    filtered = filtered.filter(
+      (d) =>
+        d.name?.toLowerCase().includes(q) ||
+        d.specialty?.toLowerCase().includes(q) ||
+        d.location?.toLowerCase().includes(q)
+    );
+  }
+
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / limit) || 0;
+  const startIndex = (page - 1) * limit;
+  const data = filtered.slice(startIndex, startIndex + limit);
+
+  return {
+    data,
+    total,
+    page,
+    limit,
+    totalPages,
+    hasNextPage: page < totalPages && data.length > 0,
+  };
+}
+
+export function fetchFilteredProducts({ page = 1, limit = 10, search = '', category = '', sortOption = 'recommended' } = {}) {
+  const allProducts = generateProducts(500, 0);
+  let filtered = allProducts;
+
+  if (category && !category.toLowerCase().includes('all') && !category.toLowerCase().includes('सभी')) {
+    const catLower = category.toLowerCase().split(' ')[0];
+    filtered = filtered.filter(
+      (p) =>
+        p.category?.toLowerCase().includes(catLower) ||
+        p.title?.toLowerCase().includes(catLower)
+    );
+  }
+
+  if (search && search.trim().length > 0) {
+    const q = search.trim().toLowerCase();
+    filtered = filtered.filter(
+      (p) =>
+        p.title?.toLowerCase().includes(q) ||
+        p.category?.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q)
+    );
+  }
+
+  filtered = [...filtered].sort((first, second) => {
+    if (sortOption === 'priceAsc') return first.price - second.price;
+    if (sortOption === 'priceDesc') return second.price - first.price;
+    if (sortOption === 'ratingDesc') return second.rating - first.rating;
+    return 0;
+  });
+
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / limit) || 0;
+  const startIndex = (page - 1) * limit;
+  const data = filtered.slice(startIndex, startIndex + limit);
+
+  return {
+    data,
+    total,
+    page,
+    limit,
+    totalPages,
+    hasNextPage: page < totalPages && data.length > 0,
+  };
+}
+
+export function fetchFilteredHealthRecords({ page = 1, limit = 10, search = '', category = '' } = {}) {
+  const allRecords = generateHealthRecords(50);
+  let filtered = allRecords;
+
+  if (category && !category.toLowerCase().includes('all') && !category.toLowerCase().includes('सभी')) {
+    filtered = filtered.filter((r) => r.type?.toLowerCase() === category.toLowerCase());
+  }
+
+  if (search && search.trim().length > 0) {
+    const q = search.trim().toLowerCase();
+    filtered = filtered.filter(
+      (r) =>
+        r.title?.toLowerCase().includes(q) ||
+        r.doctorName?.toLowerCase().includes(q) ||
+        r.type?.toLowerCase().includes(q) ||
+        r.tags?.some((tag) => tag.toLowerCase().includes(q))
+    );
+  }
+
+  // Sort latest record at top (date descending)
+  filtered = [...filtered].sort((a, b) => b.date.localeCompare(a.date));
+
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / limit) || 0;
+  const startIndex = (page - 1) * limit;
+  const data = filtered.slice(startIndex, startIndex + limit);
+
+  return {
+    data,
+    total,
+    page,
+    limit,
+    totalPages,
+    hasNextPage: page < totalPages && data.length > 0,
+  };
+}
+
