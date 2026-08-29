@@ -7,7 +7,9 @@ Production-ready Ayurvedic Super App built with **React Native**, **TypeScript**
 ## 🌟 Key Architecture & Features
 
 ### 1. Modules
+
 - **Module 1 – Consultations:**
+
   - Virtualized listing of 5,000 doctors.
   - Search by name/specialty/location and multi-filtering (experience, ratings, availability today).
   - Slot Picker Matrix with conflict detection, expired slot prevention, and double-booking protection.
@@ -15,6 +17,7 @@ Production-ready Ayurvedic Super App built with **React Native**, **TypeScript**
   - Upcoming Consultations modal with cancellation workflow.
 
 - **Module 2 – Shop:**
+
   - Virtualized infinite scroll grid of 20,000 products.
   - Multi-filtering by category and dosage form with price & rating sorting options.
   - Product details modal with herbal benefits breakdown.
@@ -29,11 +32,13 @@ Production-ready Ayurvedic Super App built with **React Native**, **TypeScript**
   - Attachment Viewer Modal with support for image previews and digital PDF clinical report view.
 
 ### 2. Performance Challenge Solutions
-- **Deterministic Dataset Generator:** Memory-efficient pre-indexed dataset generation producing 35,000 total items.
+
+- **Deterministic Dataset Generator:** Reproducible generated doctors, products, and health records for large-data testing.
 - **Virtualized Rendering:** Custom `VirtualizedGrid` leveraging React Native `FlatList` windowing, clipped subviews removal, and key extraction.
 - **Memoization:** Extensive use of `useMemo` and `useCallback` to preserve filter computations across render cycles.
 
 ### 3. Offline-First & Reliability Engine
+
 - **Cached API Responses:** `ApiClient` caches responses for instant offline fallback.
 - **Offline Action Queue:** Queues booking attempts, cart changes, and order placements when disconnected.
 - **Automatic Sync:** Sync engine automatically flushes and processes queued actions upon network restoration.
@@ -44,6 +49,7 @@ Production-ready Ayurvedic Super App built with **React Native**, **TypeScript**
   - Session expiration simulation (401 Unauthorized).
 
 ### 4. Production Engineering & DX
+
 - **Theme & Dark Mode:** Light/Dark theme engine with Amrutam Ayurvedic color tokens (Forest Green `#3A643B`, Soft Cream `#FFF7ED`, Warm Amber `#E07A5F`).
 - **Responsive Layout:** Dynamic UI adapting across **Mobile (<600px)**, **Tablet (600-1024px)**, and **Desktop (>1024px)** with multi-column grids.
 - **Localization (i18n):** Complete dictionary support for English (`en`) and Hindi (`hi`).
@@ -59,42 +65,26 @@ Production-ready Ayurvedic Super App built with **React Native**, **TypeScript**
 AmrutamAssignment/
 ├── index.html                   # Web application entry template
 ├── index.web.tsx                # Web mounting point (React Native Web)
-├── index.js                     # React Native native entry point
+├── index.ts                     # React Native native entry point
 ├── App.tsx                      # Main App wrapper & Error Boundary
 ├── vite.config.js               # Web bundler configuration
 ├── src/
-│   ├── core/
-│   │   ├── api/                 # ApiClient, Caching, Chaos & Timeout handlers
-│   │   ├── config/              # Environment config & feature flags
-│   │   ├── i18n/                # English & Hindi translation dictionaries
-│   │   ├── logger/              # Logger & Crash reporting abstraction
-│   │   └── offline/             # Offline queue manager & auto-sync engine
-│   ├── data/
-│   │   └── mockGenerator.ts     # Data generators (5k Doctors, 20k Products, 10k Records)
-│   ├── theme/
-│   │   ├── theme.ts             # Light & Dark color tokens & responsive breakpoints
-│   │   └── ThemeContext.tsx     # Theme context provider
-│   ├── store/
-│   │   └── AppContext.tsx       # Global state store for Consultations, Shop, Cart, Records & Controls
-│   ├── components/
-│   │   ├── Header.tsx           # Responsive navigation header bar
-│   │   ├── DevControlDeck.tsx   # Interactive floating panel for reliability & offline testing
-│   │   ├── GlobalToast.tsx      # Global notification toast container
-│   │   ├── ErrorBoundary.tsx    # React error boundary component
-│   │   ├── VirtualizedGrid.tsx  # Optimized virtualized grid component
-│   │   └── AttachmentViewerModal.tsx # Preview modal for images & PDF thumbnails
-│   └── modules/
-│       ├── consultations/       # Doctor Listing, Slot Picker & Booking Flow
-│       ├── shop/                # Product Grid, Cart Drawer, Wishlist & Checkout
-│       └── health_records/      # Patient Timeline, Record Types & Tag Filtering
-└── __tests__/                   # Jest unit & hook tests
+│   ├── core/                    # API, environment, i18n, logging, offline and secure storage
+│   ├── data/mockGenerator.ts    # Large deterministic mock datasets
+│   ├── theme/theme.ts           # Shared light/dark design tokens
+│   ├── store/                   # Redux store and feature slices
+│   ├── navigation/AppNavigator.tsx
+│   ├── components/              # Reusable UI, error, toast and virtualization components
+│   ├── modules/                 # Consultations, Shop and Health Records
+│   └── screens/                 # Detail, cart, checkout and booking screens
+└── src/__tests__/               # Redux, generator and API regression tests
 ```
 
 ---
 
 ## 🧪 Testing
 
-Run automated unit tests for business logic, slot validation, cart calculation, and API reliability:
+Run automated tests for business logic, generated data contracts, and API reliability:
 
 ```bash
 # Run Jest tests
@@ -103,16 +93,19 @@ npm test
 
 ---
 
-## 🚀 Running the Web Application
+## 🚀 Running the Application
 
-The project is configured for instant browser previewing using React Native Web:
+Run the native Android application:
 
 ```bash
-# Start Web Development Server
-npm run web
+# Start Metro
+npm start
+
+# In another terminal
+npm run android
 ```
 
-Open browser at `http://localhost:3000`.
+TypeScript validation can be run with `npx tsc --noEmit`.
 
 ---
 

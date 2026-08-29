@@ -11,6 +11,8 @@ import {
 } from '../store/slices/shopSlice';
 import { setOffline, toggleDarkMode } from '../store/slices/devSlice';
 import { translations } from '../core/i18n/i18n';
+import { generateDoctors, generateProducts, generateHealthRecords } from '../data/mockGenerator';
+import { ApiClient } from '../core/api/apiClient';
 
 describe('Redux Toolkit State Management', () => {
   test('handles dark mode and offline state toggles', () => {
@@ -83,5 +85,24 @@ describe('Redux Toolkit State Management', () => {
     expect(state.consultations.upcomingBookings[0].doctorId).toBe(
       firstDoctor.id,
     );
+  });
+
+  test('generates stable datasets with the expected item shapes', () => {
+    expect(generateDoctors(3)).toHaveLength(3);
+    expect(generateDoctors(3)[0]).toEqual(expect.objectContaining({ id: expect.any(String), slots: expect.any(Array) }));
+    expect(generateProducts(3)[0]).toEqual(expect.objectContaining({ id: expect.any(String), benefits: expect.any(Array) }));
+    expect(generateHealthRecords(2)).toHaveLength(6);
+  });
+
+  test('returns cached API data when offline', async () => {
+    const client = new ApiClient();
+    const onlineResponse = await client.request('test', () => [{ id: 'cached' }], { timeoutMs: 1000 });
+    client.isOffline = true;
+
+    const offlineResponse = await client.request('test', () => [], { timeoutMs: 1000 });
+
+    expect(onlineResponse.isCached).toBe(false);
+    expect(offlineResponse.isCached).toBe(true);
+    expect(offlineResponse.data).toEqual([{ id: 'cached' }]);
   });
 });

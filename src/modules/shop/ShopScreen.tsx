@@ -24,8 +24,15 @@ export const ShopScreen = ({ navigation }) => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(t.allProducts);
+  const [sortOption, setSortOption] = useState('recommended');
 
   const categories = [t.allProducts, t.herbalOils, t.supplements, t.teasAndElixirs, t.digestive];
+  const sortOptions = [
+    { id: 'recommended', label: t.defaultSort },
+    { id: 'priceAsc', label: t.priceLowHigh },
+    { id: 'priceDesc', label: t.priceHighLow },
+    { id: 'ratingDesc', label: t.ratingHighLow },
+  ];
 
   const filteredProducts = useMemo(() => {
     let result = products;
@@ -46,8 +53,13 @@ export const ShopScreen = ({ navigation }) => {
       );
     }
 
-    return result;
-  }, [products, searchQuery, selectedCategory]);
+    return [...result].sort((first, second) => {
+      if (sortOption === 'priceAsc') return first.price - second.price;
+      if (sortOption === 'priceDesc') return second.price - first.price;
+      if (sortOption === 'ratingDesc') return second.rating - first.rating;
+      return 0;
+    });
+  }, [products, searchQuery, selectedCategory, sortOption]);
 
   const renderProductItem = useCallback(
     ({ item }) => (
@@ -109,6 +121,23 @@ export const ShopScreen = ({ navigation }) => {
             </TouchableOpacity>
           );
         })}
+      </ScrollView>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoryScroll}
+      >
+        {sortOptions.map((option) => (
+          <TouchableOpacity
+            key={option.id}
+            activeOpacity={0.8}
+            style={[styles.sortChip, sortOption === option.id && styles.sortChipActive]}
+            onPress={() => setSortOption(option.id)}
+          >
+            <Text style={styles.sortChipText}>{option.label}</Text>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
     </View>
   );
@@ -186,5 +215,22 @@ const styles = StyleSheet.create({
   },
   chipTextInactive: {
     color: '#475569',
+  },
+  sortChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  sortChipActive: {
+    backgroundColor: '#DDEBD6',
+    borderColor: '#8FB58A',
+  },
+  sortChipText: {
+    color: '#334155',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });

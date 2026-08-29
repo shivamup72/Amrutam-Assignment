@@ -3,11 +3,13 @@
  */
 
 import { logger } from '../logger/logger';
+import { env } from '../config/env';
 
 export class ApiClient {
   constructor() {
     this.cache = new Map();
     this.cacheTTLMs = 5 * 60 * 1000;
+    this.baseUrl = env.apiBaseUrl;
 
     // Simulation flags controlled by Dev Control Deck / Redux
     this.isOffline = false;
@@ -17,7 +19,7 @@ export class ApiClient {
   }
 
   async request(endpoint, fetcherFn, options = {}) {
-    const { useCache = true, timeoutMs = 8000, bypassChaos = false } = options;
+    const { useCache = true, timeoutMs = env.apiTimeoutMs, bypassChaos = false } = options;
     logger.startTrace(`API_${endpoint}`);
 
     // Check offline status
