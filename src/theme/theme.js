@@ -1,0 +1,69 @@
+/**
+ * Design Tokens & Theme Configuration (Pure JavaScript)
+ */
+
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+};
+
+export const typography = {
+  fontSizeXs: 11,
+  fontSizeSm: 13,
+  fontSizeMd: 15,
+  fontSizeLg: 18,
+  fontSizeXl: 22,
+  fontSizeXxl: 26,
+};
+
+export const lightTheme = {
+  primary: '#3A643B',
+  primaryHover: '#2C4C2D',
+  primaryLight: '#EAF2EB',
+  secondary: '#E07A5F',
+  secondaryLight: '#FDF0EC',
+  background: '#F8F9FA',
+  surface: '#FFFFFF',
+  surfaceBorder: '#E2E8F0',
+  textPrimary: '#0F172A',
+  textSecondary: '#475569',
+  textMuted: '#64748B',
+  cardBg: '#FFFFFF',
+  cardBorder: '#E2E8F0',
+  success: '#16A34A',
+  warning: '#D97706',
+  danger: '#DC2626',
+  badgeBg: '#F1F5F9',
+  inputBg: '#F8FAFC',
+  shadowColor: '#0F172A',
+  shadowOpacity: 0.06,
+};
+
+export const darkTheme = {
+  primary: '#5B9A5D',
+  primaryHover: '#3A643B',
+  primaryLight: '#1C2E20',
+  secondary: '#F28B66',
+  secondaryLight: '#2C1A14',
+  background: '#0F1713',
+  surface: '#18221B',
+  surfaceBorder: '#29392E',
+  textPrimary: '#F8FAFC',
+  textSecondary: '#94A3B8',
+  textMuted: '#64748B',
+  cardBg: '#18221B',
+  cardBorder: '#29392E',
+  success: '#22C55E',
+  warning: '#F59E0B',
+  danger: '#EF4444',
+  badgeBg: '#233227',
+  inputBg: '#121A14',
+  shadowColor: '#000000',
+  shadowOpacity: 0.3,
+};
+

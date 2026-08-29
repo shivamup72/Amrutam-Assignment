@@ -1,97 +1,122 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Amrutam Ayurvedic Super App - Senior React Native Assignment
 
-# Getting Started
+Production-ready Ayurvedic Super App built with **React Native**, **TypeScript**, **React Native Web**, and a senior modular architecture. The application comfortably handles large datasets (**5,000 Doctors**, **20,000 Shop Products**, and **10,000 Health Records**) with sub-5ms filtering and 60fps virtualized rendering.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+---
 
-## Step 1: Start Metro
+## 🌟 Key Architecture & Features
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+### 1. Modules
+- **Module 1 – Consultations:**
+  - Virtualized listing of 5,000 doctors.
+  - Search by name/specialty/location and multi-filtering (experience, ratings, availability today).
+  - Slot Picker Matrix with conflict detection, expired slot prevention, and double-booking protection.
+  - Consultation booking flow with offline queueing.
+  - Upcoming Consultations modal with cancellation workflow.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- **Module 2 – Shop:**
+  - Virtualized infinite scroll grid of 20,000 products.
+  - Multi-filtering by category and dosage form with price & rating sorting options.
+  - Product details modal with herbal benefits breakdown.
+  - Persistent cart with quantity updates, subtotal, 10% Ayurvedic discount calculation, and local storage persistence.
+  - Wishlist drawer with 1-click move to cart capability.
+  - Checkout Summary & order placement engine.
 
-```sh
-# Using npm
-npm start
+- **Module 3 – Health Records:**
+  - Patient timeline of 10,000 health records.
+  - Categorized by **Lab Report**, **Prescription**, **Consultation**, **Vaccination**, and **Allergy**.
+  - Tag search (e.g. `#ayurveda`, `#prakriti`, `#bloodtest`).
+  - Attachment Viewer Modal with support for image previews and digital PDF clinical report view.
 
-# OR using Yarn
-yarn start
+### 2. Performance Challenge Solutions
+- **Deterministic Dataset Generator:** Memory-efficient pre-indexed dataset generation producing 35,000 total items.
+- **Virtualized Rendering:** Custom `VirtualizedGrid` leveraging React Native `FlatList` windowing, clipped subviews removal, and key extraction.
+- **Memoization:** Extensive use of `useMemo` and `useCallback` to preserve filter computations across render cycles.
+
+### 3. Offline-First & Reliability Engine
+- **Cached API Responses:** `ApiClient` caches responses for instant offline fallback.
+- **Offline Action Queue:** Queues booking attempts, cart changes, and order placements when disconnected.
+- **Automatic Sync:** Sync engine automatically flushes and processes queued actions upon network restoration.
+- **Reliability Simulation (Dev Control Deck):**
+  - Offline Mode toggle.
+  - Slow 3G network simulation (1,800ms latency).
+  - API Chaos mode (simulates 500 internal server errors, invalid JSON, and partial responses).
+  - Session expiration simulation (401 Unauthorized).
+
+### 4. Production Engineering & DX
+- **Theme & Dark Mode:** Light/Dark theme engine with Amrutam Ayurvedic color tokens (Forest Green `#3A643B`, Soft Cream `#FFF7ED`, Warm Amber `#E07A5F`).
+- **Responsive Layout:** Dynamic UI adapting across **Mobile (<600px)**, **Tablet (600-1024px)**, and **Desktop (>1024px)** with multi-column grids.
+- **Localization (i18n):** Complete dictionary support for English (`en`) and Hindi (`hi`).
+- **Telemetry & Crash Reporting:** Abstraction logging utility for tracking execution traces and UI runtime errors.
+- **Global Toast Manager:** Animated alert banners for network events, queue updates, and errors.
+- **Error Boundary:** Top-level error boundary with graceful fallback UI.
+
+---
+
+## 📁 Directory Structure
+
+```
+AmrutamAssignment/
+├── index.html                   # Web application entry template
+├── index.web.tsx                # Web mounting point (React Native Web)
+├── index.js                     # React Native native entry point
+├── App.tsx                      # Main App wrapper & Error Boundary
+├── vite.config.js               # Web bundler configuration
+├── src/
+│   ├── core/
+│   │   ├── api/                 # ApiClient, Caching, Chaos & Timeout handlers
+│   │   ├── config/              # Environment config & feature flags
+│   │   ├── i18n/                # English & Hindi translation dictionaries
+│   │   ├── logger/              # Logger & Crash reporting abstraction
+│   │   └── offline/             # Offline queue manager & auto-sync engine
+│   ├── data/
+│   │   └── mockGenerator.ts     # Data generators (5k Doctors, 20k Products, 10k Records)
+│   ├── theme/
+│   │   ├── theme.ts             # Light & Dark color tokens & responsive breakpoints
+│   │   └── ThemeContext.tsx     # Theme context provider
+│   ├── store/
+│   │   └── AppContext.tsx       # Global state store for Consultations, Shop, Cart, Records & Controls
+│   ├── components/
+│   │   ├── Header.tsx           # Responsive navigation header bar
+│   │   ├── DevControlDeck.tsx   # Interactive floating panel for reliability & offline testing
+│   │   ├── GlobalToast.tsx      # Global notification toast container
+│   │   ├── ErrorBoundary.tsx    # React error boundary component
+│   │   ├── VirtualizedGrid.tsx  # Optimized virtualized grid component
+│   │   └── AttachmentViewerModal.tsx # Preview modal for images & PDF thumbnails
+│   └── modules/
+│       ├── consultations/       # Doctor Listing, Slot Picker & Booking Flow
+│       ├── shop/                # Product Grid, Cart Drawer, Wishlist & Checkout
+│       └── health_records/      # Patient Timeline, Record Types & Tag Filtering
+└── __tests__/                   # Jest unit & hook tests
 ```
 
-## Step 2: Build and run your app
+---
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+## 🧪 Testing
 
-### Android
+Run automated unit tests for business logic, slot validation, cart calculation, and API reliability:
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```bash
+# Run Jest tests
+npm test
 ```
 
-### iOS
+---
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+## 🚀 Running the Web Application
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+The project is configured for instant browser previewing using React Native Web:
 
-```sh
-bundle install
+```bash
+# Start Web Development Server
+npm run web
 ```
 
-Then, and every time you update your native dependencies, run:
+Open browser at `http://localhost:3000`.
 
-```sh
-bundle exec pod install
-```
+---
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+## 💡 Trade-Offs & Future Enhancements
 
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+1. **State Persistence:** Currently utilizes `localStorage` / `AsyncStorage` abstraction. In a large enterprise app, SQLite / WatermelonDB can be integrated for full offline database querying.
+2. **Audio/Video Tele-consultations:** WebRTC signaling abstraction can be added to launch direct video calls from the consultation screen.
