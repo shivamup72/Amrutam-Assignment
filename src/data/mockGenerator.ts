@@ -1,8 +1,3 @@
-/**
- * High-Performance Deterministic Dataset Generator (Pure JavaScript)
- * Supports 5,000 Doctors, 20,000 Products, and 50 records per month for October, September, August
- */
-
 const SPECIALTIES = [
   'Kaya Chikitsa (Internal Medicine)',
   'Shalya Tantra (Surgery & Pain)',
@@ -202,9 +197,36 @@ export function generateHealthRecordsPage(offset = 0, count = 10) {
   return records;
 }
 
+// Cache singletons for ultra-fast performance across operations
+let _doctorsCache: any[] | null = null;
+let _productsCache: any[] | null = null;
+let _healthRecordsCache: any[] | null = null;
+
+export function getDoctorsDataset(count = 5000): any[] {
+  if (!_doctorsCache) {
+    _doctorsCache = generateDoctors(count, 0);
+  }
+  return _doctorsCache;
+}
+
+export function getProductsDataset(count = 20000): any[] {
+  if (!_productsCache) {
+    _productsCache = generateProducts(count, 0);
+  }
+  return _productsCache;
+}
+
+export function getHealthRecordsDataset(totalCount = 10000): any[] {
+  if (!_healthRecordsCache) {
+    const itemsPerMonth = Math.ceil(totalCount / 3);
+    _healthRecordsCache = generateHealthRecords(itemsPerMonth);
+  }
+  return _healthRecordsCache;
+}
+
 // Server-side Filtering & Pagination Helpers
 export function fetchFilteredDoctors({ page = 1, limit = 10, search = '', category = '' } = {}) {
-  const allDoctors = generateDoctors(500, 0);
+  const allDoctors = getDoctorsDataset(5000);
   let filtered = allDoctors;
 
   if (category && !category.toLowerCase().includes('all') && !category.toLowerCase().includes('सभी')) {
@@ -242,7 +264,7 @@ export function fetchFilteredDoctors({ page = 1, limit = 10, search = '', catego
 }
 
 export function fetchFilteredProducts({ page = 1, limit = 10, search = '', category = '', sortOption = 'recommended' } = {}) {
-  const allProducts = generateProducts(500, 0);
+  const allProducts = getProductsDataset(20000);
   let filtered = allProducts;
 
   if (category && !category.toLowerCase().includes('all') && !category.toLowerCase().includes('सभी')) {
@@ -287,7 +309,7 @@ export function fetchFilteredProducts({ page = 1, limit = 10, search = '', categ
 }
 
 export function fetchFilteredHealthRecords({ page = 1, limit = 10, search = '', category = '' } = {}) {
-  const allRecords = generateHealthRecords(50);
+  const allRecords = getHealthRecordsDataset(10000);
   let filtered = allRecords;
 
   if (category && !category.toLowerCase().includes('all') && !category.toLowerCase().includes('सभी')) {
@@ -322,4 +344,5 @@ export function fetchFilteredHealthRecords({ page = 1, limit = 10, search = '', 
     hasNextPage: page < totalPages && data.length > 0,
   };
 }
+
 

@@ -1,7 +1,3 @@
-/**
- * Attachment Preview Modal for Health Record Images & PDF Thumbnails (Pure JavaScript)
- */
-
 import React from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from 'react-native';
 import { useSelector } from 'react-redux';

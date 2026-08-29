@@ -1,7 +1,3 @@
-/**
- * Upcoming Bookings Screen (React Navigation Stack Screen)
- */
-
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';

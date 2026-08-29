@@ -1,7 +1,3 @@
-/**
- * Global Error Boundary Component (Pure JavaScript)
- */
-
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { logger } from '../core/logger/logger';

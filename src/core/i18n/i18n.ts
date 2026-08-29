@@ -1,7 +1,3 @@
-/**
- * Multi-Language Localization Engine (English & Hindi)
- */
-
 export const translations = {
   en: {
     appTitle: 'Amrutam Ayurvedic Super App',

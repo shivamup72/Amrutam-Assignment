@@ -1,7 +1,3 @@
-/**
- * Logger & Crash Reporting Abstraction Utility
- */
-
 class AppLogger {
   constructor() {
     this.crashLogs = [];

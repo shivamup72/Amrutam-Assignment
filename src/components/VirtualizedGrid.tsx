@@ -1,8 +1,3 @@
-/**
- * Highly Performant Virtualized List / Grid Component (Pure JavaScript)
- * Supports 5,000 Doctors, 20,000 Products, and 10,000 Health Records with Virtualization & Pagination
- */
-
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl, Platform } from 'react-native';
 import { useSelector } from 'react-redux';

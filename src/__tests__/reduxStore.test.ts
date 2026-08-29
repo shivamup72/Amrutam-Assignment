@@ -1,7 +1,3 @@
-/**
- * Redux Store & Slices Integration Tests (Pure JavaScript)
- */
-
 import { store } from '../store';
 import { bookConsultationSlot, fetchDoctors } from '../store/slices/consultationsSlice';
 import {

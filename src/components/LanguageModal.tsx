@@ -1,7 +1,3 @@
-/**
- * Language Selector Popup Modal Component
- */
-
 import React from 'react';
 import {
   Modal,

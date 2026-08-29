@@ -1,34 +1,16 @@
-/**
- * Health Records Redux Slice with Redux Toolkit Async Thunks
- */
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchFilteredHealthRecords } from '../../data/mockGenerator';
-import { apiClient } from '../../core/api/apiClient';
+import { getHealthRecords } from '../../services/healthRecordService';
 
 export const fetchHealthRecords = createAsyncThunk(
   'healthRecords/fetchHealthRecords',
-  async (options = {}, { rejectWithValue }) => {
+  async (options: any = {}, { rejectWithValue }) => {
     try {
-      const page = options.page || 1;
-      const limit = options.limit || 10;
-      const search = options.search || '';
-      const category = options.category || '';
-      const response = await apiClient.request(
-        `health_records?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`,
-        () => fetchFilteredHealthRecords({ page, limit, search, category }),
-        options,
-      );
+      const response = await getHealthRecords(options);
       return {
-        data: response.data.data || [],
-        total: response.data.total || 0,
-        page: response.data.page || page,
-        limit: response.data.limit || limit,
-        totalPages: response.data.totalPages || 0,
-        hasNextPage: !!response.data.hasNextPage,
-        reset: !!options.reset || page === 1,
+        ...response,
+        reset: !!options.reset || (options.page || 1) === 1,
       };
-    } catch (err) {
+    } catch (err: any) {
       return rejectWithValue(err.message || 'Failed to fetch health records');
     }
   }
@@ -75,8 +57,8 @@ const healthRecordsSlice = createSlice({
         if (action.payload.reset || action.payload.page === 1) {
           state.healthRecords = newRecords;
         } else {
-          const existingIds = new Set(state.healthRecords.map((r) => r.id));
-          const filteredNew = newRecords.filter((r) => !existingIds.has(r.id));
+          const existingIds = new Set(state.healthRecords.map((r: any) => r.id));
+          const filteredNew = newRecords.filter((r: any) => !existingIds.has(r.id));
           state.healthRecords.push(...filteredNew);
         }
         state.hasNextPage = action.payload.hasNextPage;
@@ -93,4 +75,3 @@ const healthRecordsSlice = createSlice({
 export const { setPreviewRecord, setHealthRecords, resetHealthRecordsState } = healthRecordsSlice.actions;
 
 export default healthRecordsSlice.reducer;
-

@@ -1,7 +1,3 @@
-/**
- * Checkout Screen (React Navigation Stack Screen)
- */
-
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';

@@ -1,7 +1,3 @@
-/**
- * Dev Simulator & UI Controls Redux Slice with Biometric Authentication Support
- */
-
 import { createSlice } from '@reduxjs/toolkit';
 import { localStorage, STORAGE_KEYS } from '../../storage/storage';
 

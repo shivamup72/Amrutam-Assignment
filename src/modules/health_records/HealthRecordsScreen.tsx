@@ -1,7 +1,3 @@
-/**
- * Health Records Dashboard Screen (Virtualized Grid with Infinite Scroll & Grouping)
- */
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';

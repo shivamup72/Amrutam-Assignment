@@ -1,7 +1,3 @@
-/**
- * Clean Timeline Record Card Component (Styled after AyurWellness Mockup)
- */
-
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';

@@ -1,7 +1,3 @@
-/**
- * Product Detail Screen (React Navigation Stack Screen)
- */
-
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';

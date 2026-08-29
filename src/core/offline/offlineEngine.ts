@@ -1,7 +1,3 @@
-/**
- * Offline Queue & Auto-Sync Engine with Encrypted Secure Storage
- */
-
 import { logger } from '../logger/logger';
 import { secureStorage } from '../storage/secureStorage';
 

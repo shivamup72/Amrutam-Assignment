@@ -12,7 +12,6 @@ let storage;
 try {
   storage = new MMKV({ id: 'amrutam-local-storage' });
 } catch (error) {
-  // Keep unit tests and unsupported environments usable without native MMKV.
   const fallback = new Map();
   storage = {
     set: (key, value) => fallback.set(key, value),

@@ -1,37 +1,18 @@
-/**
- * Shop & Cart Redux Slice with Redux Toolkit Async Thunks
- */
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchFilteredProducts } from '../../data/mockGenerator';
-import { apiClient } from '../../core/api/apiClient';
+import { getProducts } from '../../services/productService';
 import { offlineEngine } from '../../core/offline/offlineEngine';
 import { localStorage, STORAGE_KEYS } from '../../storage/storage';
 
 export const fetchProducts = createAsyncThunk(
   'shop/fetchProducts',
-  async (options = {}, { rejectWithValue }) => {
+  async (options: any = {}, { rejectWithValue }) => {
     try {
-      const page = options.page || 1;
-      const limit = options.limit || 10;
-      const search = options.search || '';
-      const category = options.category || '';
-      const sortOption = options.sortOption || 'recommended';
-      const response = await apiClient.request(
-        `products?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}&sort=${sortOption}`,
-        () => fetchFilteredProducts({ page, limit, search, category, sortOption }),
-        options,
-      );
+      const response = await getProducts(options);
       return {
-        data: response.data.data || [],
-        total: response.data.total || 0,
-        page: response.data.page || page,
-        limit: response.data.limit || limit,
-        totalPages: response.data.totalPages || 0,
-        hasNextPage: !!response.data.hasNextPage,
-        reset: !!options.reset || page === 1,
+        ...response,
+        reset: !!options.reset || (options.page || 1) === 1,
       };
-    } catch (err) {
+    } catch (err: any) {
       return rejectWithValue(err.message || 'Failed to fetch products');
     }
   },
@@ -62,7 +43,7 @@ const shopSlice = createSlice({
     },
     addToCart: (state, action) => {
       const { product, isOffline } = action.payload;
-      const existing = state.cart.find(item => item.product.id === product.id);
+      const existing = state.cart.find((item: any) => item.product.id === product.id);
       if (existing) {
         existing.quantity += 1;
       } else {
@@ -78,23 +59,23 @@ const shopSlice = createSlice({
     },
     updateCartQuantity: (state, action) => {
       const { productId, delta } = action.payload;
-      const existing = state.cart.find(item => item.product.id === productId);
+      const existing = state.cart.find((item: any) => item.product.id === productId);
       if (existing) {
         existing.quantity += delta;
         if (existing.quantity <= 0) {
-          state.cart = state.cart.filter(item => item.product.id !== productId);
+          state.cart = state.cart.filter((item: any) => item.product.id !== productId);
         }
       }
     },
     removeFromCart: (state, action) => {
       state.cart = state.cart.filter(
-        item => item.product.id !== action.payload,
+        (item: any) => item.product.id !== action.payload,
       );
     },
     toggleWishlist: (state, action) => {
       const productId = action.payload;
       if (state.wishlistIds.includes(productId)) {
-        state.wishlistIds = state.wishlistIds.filter(id => id !== productId);
+        state.wishlistIds = state.wishlistIds.filter((id: any) => id !== productId);
       } else {
         state.wishlistIds.push(productId);
       }
@@ -132,8 +113,8 @@ const shopSlice = createSlice({
         if (action.payload.reset || action.payload.page === 1) {
           state.products = newProducts;
         } else {
-          const existingIds = new Set(state.products.map(p => p.id));
-          const filteredNew = newProducts.filter(p => !existingIds.has(p.id));
+          const existingIds = new Set(state.products.map((p: any) => p.id));
+          const filteredNew = newProducts.filter((p: any) => !existingIds.has(p.id));
           state.products.push(...filteredNew);
         }
         state.hasNextPage = action.payload.hasNextPage;
@@ -147,12 +128,12 @@ const shopSlice = createSlice({
   },
 });
 
-const persistShopState = state => {
+const persistShopState = (state: any) => {
   localStorage.setItem(STORAGE_KEYS.CART, state.cart);
   localStorage.setItem(STORAGE_KEYS.WISHLIST, state.wishlistIds);
 };
 
-const shopReducer = (state, action) => {
+const shopReducer = (state: any, action: any) => {
   const nextState = shopSlice.reducer(state, action);
   if (
     [

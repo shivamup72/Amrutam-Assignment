@@ -1,36 +1,18 @@
-/**
- * Consultations Redux Slice with Redux Toolkit Async Thunks
- */
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchFilteredDoctors } from '../../data/mockGenerator';
-import { apiClient } from '../../core/api/apiClient';
+import { getDoctors } from '../../services/consultationService';
 import { offlineEngine } from '../../core/offline/offlineEngine';
 import { localStorage, STORAGE_KEYS } from '../../storage/storage';
 
 export const fetchDoctors = createAsyncThunk(
   'consultations/fetchDoctors',
-  async (options = {}, { rejectWithValue }) => {
+  async (options: any = {}, { rejectWithValue }) => {
     try {
-      const page = options.page || 1;
-      const limit = options.limit || 10;
-      const search = options.search || '';
-      const category = options.category || '';
-      const response = await apiClient.request(
-        `doctors?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`,
-        () => fetchFilteredDoctors({ page, limit, search, category }),
-        options,
-      );
+      const response = await getDoctors(options);
       return {
-        data: response.data.data || [],
-        total: response.data.total || 0,
-        page: response.data.page || page,
-        limit: response.data.limit || limit,
-        totalPages: response.data.totalPages || 0,
-        hasNextPage: !!response.data.hasNextPage,
-        reset: !!options.reset || page === 1,
+        ...response,
+        reset: !!options.reset || (options.page || 1) === 1,
       };
-    } catch (err) {
+    } catch (err: any) {
       return rejectWithValue(err.message || 'Failed to fetch doctors');
     }
   },
@@ -63,10 +45,10 @@ const consultationsSlice = createSlice({
     },
     bookConsultationSlot: (state, action) => {
       const { doctorId, slotId, isOffline } = action.payload;
-      const doctor = state.doctors.find(d => d.id === doctorId);
+      const doctor = state.doctors.find((d: any) => d.id === doctorId);
       if (!doctor) return;
 
-      const slot = doctor.slots.find(s => s.id === slotId);
+      const slot = doctor.slots.find((s: any) => s.id === slotId);
       if (!slot) return;
 
       slot.isBooked = true;
@@ -92,11 +74,11 @@ const consultationsSlice = createSlice({
     },
     cancelConsultationBooking: (state, action) => {
       const { bookingId, isOffline } = action.payload;
-      const booking = state.upcomingBookings.find(b => b.id === bookingId);
+      const booking = state.upcomingBookings.find((b: any) => b.id === bookingId);
       if (booking) {
         booking.status = 'CANCELLED';
-        const doctor = state.doctors.find(item => item.id === booking.doctorId);
-        const slot = doctor?.slots.find(item => item.id === booking.slotId);
+        const doctor = state.doctors.find((item: any) => item.id === booking.doctorId);
+        const slot = doctor?.slots.find((item: any) => item.id === booking.slotId);
         if (slot) slot.isBooked = false;
       }
 
@@ -108,11 +90,11 @@ const consultationsSlice = createSlice({
       state.upcomingBookings = Array.isArray(action.payload)
         ? action.payload
         : [];
-      state.upcomingBookings.forEach(booking => {
+      state.upcomingBookings.forEach((booking: any) => {
         if (booking.status === 'CANCELLED') return;
-        const doctor = state.doctors.find(item => item.id === booking.doctorId);
+        const doctor = state.doctors.find((item: any) => item.id === booking.doctorId);
         const slot = doctor?.slots.find(
-          item =>
+          (item: any) =>
             item.id === booking.slotId ||
             (item.time === booking.slotTime && item.date === booking.slotDate),
         );
@@ -132,8 +114,8 @@ const consultationsSlice = createSlice({
         if (action.payload.reset || action.payload.page === 1) {
           state.doctors = newDoctors;
         } else {
-          const existingIds = new Set(state.doctors.map(d => d.id));
-          const filteredNew = newDoctors.filter(d => !existingIds.has(d.id));
+          const existingIds = new Set(state.doctors.map((d: any) => d.id));
+          const filteredNew = newDoctors.filter((d: any) => !existingIds.has(d.id));
           state.doctors.push(...filteredNew);
         }
         state.hasNextPage = action.payload.hasNextPage;
@@ -147,11 +129,11 @@ const consultationsSlice = createSlice({
   },
 });
 
-const persistConsultationsState = state => {
+const persistConsultationsState = (state: any) => {
   localStorage.setItem(STORAGE_KEYS.BOOKINGS, state.upcomingBookings);
 };
 
-const consultationsReducer = (state, action) => {
+const consultationsReducer = (state: any, action: any) => {
   const nextState = consultationsSlice.reducer(state, action);
   if (
     [

@@ -1,8 +1,3 @@
-/**
- * Biometric Authentication Security Lock Modal Component
- * Appears when Biometric Security is Enabled in Profile Drawer
- */
-
 import { useEffect, useRef } from 'react';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import { useSelector, useDispatch } from 'react-redux';
@@ -19,7 +14,6 @@ export const BiometricAuthModal = () => {
     isMounted.current = false;
   }, []);
 
-  // Visible when Biometric Security is enabled AND user is NOT authenticated yet
   const visible = Boolean(isBiometricEnabled && !isBiometricAuthenticated);
 
   const handleAuthenticate = async () => {

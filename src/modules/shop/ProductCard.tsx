@@ -1,7 +1,3 @@
-/**
- * Shop Product Card Component (Styled matching AyurWellness Mockups)
- */
-
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';

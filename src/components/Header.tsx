@@ -1,8 +1,3 @@
-/**
- * Clean Modern Header Component (App Logo on Left, Profile Drawer Avatar on Right)
- * Styled after AyurWellness Ayurvedic Super App design system
- */
-
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';

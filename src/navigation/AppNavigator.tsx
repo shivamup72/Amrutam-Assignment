@@ -8,8 +8,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { lightTheme, darkTheme } from '../theme/theme';
 import { translations } from '../core/i18n/i18n';
 import { Header } from '../components/Header';
-
-// Screens Imports
 import { ConsultationsScreen } from '../modules/consultations/ConsultationsScreen';
 import { ShopScreen } from '../modules/shop/ShopScreen';
 import { HealthRecordsScreen } from '../modules/health_records/HealthRecordsScreen';

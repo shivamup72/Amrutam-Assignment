@@ -1,7 +1,3 @@
-/**
- * Wishlist Screen (React Navigation Stack Screen)
- */
-
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';

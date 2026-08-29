@@ -1,7 +1,3 @@
-/**
- * Slot Picker Matrix (Pure JavaScript)
- */
-
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSelector } from 'react-redux';

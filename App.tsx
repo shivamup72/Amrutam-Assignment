@@ -1,7 +1,3 @@
-/**
- * Amrutam Ayurvedic Super App - Main Entrypoint
- */
-
 import React from 'react';
 import { View, StyleSheet, StatusBar, useWindowDimensions } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';

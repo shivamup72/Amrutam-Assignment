@@ -1,8 +1,3 @@
-/**
- * Secure Local Storage Engine Abstraction
- * Encrypted persistence for sensitive patient data, authentication tokens, and offline queues
- */
-
 import { logger } from '../logger/logger';
 
 let storageEngine;

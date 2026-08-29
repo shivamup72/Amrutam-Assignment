@@ -1,8 +1,3 @@
-/**
- * Global Toast System Component (Redux Toolkit)
- * Auto-dismisses after 2 seconds
- */
-
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';

@@ -1,7 +1,3 @@
-/**
- * Modern Left-to-Right Slide Profile Drawer Component
- */
-
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Modal,

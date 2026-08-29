@@ -1,7 +1,3 @@
-/**
- * Central Redux Store Configuration
- */
-
 import { configureStore } from '@reduxjs/toolkit';
 import devReducer from './slices/devSlice';
 import consultationsReducer from './slices/consultationsSlice';

@@ -1,7 +1,3 @@
-/**
- * Consultations Module Main Screen (Styled matching AyurWellness Mockups)
- */
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, useWindowDimensions, Image } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';

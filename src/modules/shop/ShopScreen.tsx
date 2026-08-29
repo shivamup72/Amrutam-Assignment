@@ -1,7 +1,3 @@
-/**
- * Shop Module Main Screen (Styled matching AyurWellness Mockup)
- */
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, useWindowDimensions, Image } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
@@ -207,39 +203,6 @@ export const ShopScreen = ({ navigation }) => {
     </View>
   );
 
-  // const renderFooterTrustBadges = () => (
-  //   <View style={[styles.trustBadgesContainer, { backgroundColor: isDarkMode ? '#1E293B' : '#F8FAF6', borderColor: isDarkMode ? '#334155' : '#EAF2E8' }]}>
-  //     <View style={styles.trustItem}>
-  //       <Text style={styles.trustIcon}>🛡️</Text>
-  //       <View>
-  //         <Text style={styles.trustTitle}>100% Natural</Text>
-  //         <Text style={styles.trustSub}>Pure & Safe</Text>
-  //       </View>
-  //     </View>
-  //     <View style={styles.trustItem}>
-  //       <Text style={styles.trustIcon}>🥣</Text>
-  //       <View>
-  //         <Text style={styles.trustTitle}>Ayurvedic</Text>
-  //         <Text style={styles.trustSub}>Ancient Wisdom</Text>
-  //       </View>
-  //     </View>
-  //     <View style={styles.trustItem}>
-  //       <Text style={styles.trustIcon}>🌿</Text>
-  //       <View>
-  //         <Text style={styles.trustTitle}>No Chemicals</Text>
-  //         <Text style={styles.trustSub}>No Side Effects</Text>
-  //       </View>
-  //     </View>
-  //     <View style={styles.trustItem}>
-  //       <Text style={styles.trustIcon}>✅</Text>
-  //       <View>
-  //         <Text style={styles.trustTitle}>Trusted Quality</Text>
-  //         <Text style={styles.trustSub}>Lab Tested</Text>
-  //       </View>
-  //     </View>
-  //   </View>
-  // );
-
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <PaginatedFlatList
@@ -248,7 +211,6 @@ export const ShopScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         renderItem={renderProductItem}
         headerComponent={renderHeader()}
-        // footerComponent={renderFooterTrustBadges()}
         isInitialLoading={isInitialLoading && products.length === 0}
         isFetchingMore={isFetchingMore}
         hasMore={hasNextPage}
@@ -290,9 +252,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     padding: 0,
     fontWeight: '500',
-  },
-  filterControlBtn: {
-    paddingLeft: 8,
   },
   categoryScroll: {
     gap: 8,
@@ -368,82 +327,6 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     fontWeight: '800',
   },
-  bannerCard: {
-    position: 'relative',
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    minHeight: 140,
-    overflow: 'hidden',
-  },
-  bannerContent: {
-    flex: 1,
-    zIndex: 2,
-  },
-  bannerBadge: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    marginBottom: 8,
-  },
-  bannerBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: '#2D5B30',
-  },
-  bannerTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    lineHeight: 22,
-  },
-  bannerSubtitle: {
-    fontSize: 11,
-    color: '#64748B',
-    marginTop: 4,
-    marginBottom: 12,
-    fontWeight: '500',
-  },
-  exploreBtn: {
-    backgroundColor: '#2D5B30',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
-  },
-  exploreBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  bannerImage: {
-    width: 100,
-    height: 110,
-    borderRadius: 14,
-    alignSelf: 'center',
-  },
-  dotsRow: {
-    position: 'absolute',
-    bottom: 8,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#CBD5E1',
-  },
-  dotActive: {
-    backgroundColor: '#2D5B30',
-    width: 8,
-  },
   sectionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -460,34 +343,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: '#2D5B30',
-  },
-  trustBadgesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    padding: 12,
-    borderRadius: 16,
-    borderWidth: 1,
-    marginTop: 16,
-    gap: 8,
-  },
-  trustItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    minWidth: '45%',
-  },
-  trustIcon: {
-    fontSize: 16,
-  },
-  trustTitle: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#1E293B',
-  },
-  trustSub: {
-    fontSize: 9.5,
-    color: '#64748B',
-    fontWeight: '500',
   },
 });
